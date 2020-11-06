@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.vaadin</groupId>
+        <artifactId>flow-osgi-project</artifactId>
+        <version>6.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>flow-osgi-test-containers</artifactId>
+    <name>Flow tests</name>
+    <description>Test modules for Flow OSGi support</description>
+    <packaging>pom</packaging>
+
+    <properties>
+        <!-- Don't care about coding style or licenses for tests -->
+        <sonar.skip>true</sonar.skip>
+        <license.skipDownloadLicenses>true</license.skipDownloadLicenses>
+
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <!-- Used in the tests, should be overridden for each module to support
+            concurrent running of test modules. -->
+        <server.port>8888</server.port>
+        <server.stop.port>8889</server.stop.port>
+        <!-- This property is needed to allow some Win-specific IT tests -->
+        <!-- to be disabled via system property in CI until they got fixed-->
+        <exclude.windows.failed.it.tests></exclude.windows.failed.it.tests>
+    </properties>
+
+    <modules>
+        <module>felix-jetty</module>
+    </modules>
+
+    <dependencies>
+        <!-- Project dependencies -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-html-components</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-dnd</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-test-util</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+           <groupId>com.vaadin</groupId>
+           <artifactId>flow-test-root-context-npm</artifactId>
+           <version>${project.version}</version>
+           <type>jar</type>
+           <classifier>ui</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-osgi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-test-root-context-npm</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>${osgi.core.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.cm</artifactId>
+            <version>1.5.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- export test server port to integration tests -->
+                    <systemPropertyVariables>
+                        <serverPort>${server.port}</serverPort>
+                        <webdriver.chrome.driver>${webdriver.chrome.driver}
+                        </webdriver.chrome.driver>
+                    </systemPropertyVariables>
+                    <excludedGroups>${test.excludegroup}</excludedGroups>
+                    <excludes>
+                        <exclude>**/*$*</exclude>
+                        <exclude>${exclude.it.tests}</exclude>
+                        <exclude>${exclude.windows.failed.it.tests}</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>set-system-properties</goal>
+                        </goals>
+                        <configuration>
+                            <properties>
+                                <property>
+                                    <name>vaadin.devmode.liveReload.enabled
+                                    </name>
+                                    <value>false</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        <pluginManagement>
+            <plugins>
+                <!-- Remove libs before ITs to avoid scan complaining about classes in multiple locations -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>1.8</version>
+                    <executions>
+                        <execution>
+                            <id>delete-lib-folder</id>
+                            <phase>pre-integration-test</phase>
+                            <goals>
+                                <goal>run</goal>
+                            </goals>
+                            <configuration>
+                                <tasks>
+                                    <delete>
+                                        <fileset
+                                                dir="${project.build.directory}/${project.build.finalName}/WEB-INF/lib"
+                                                includes="*.jar"/>
+                                    </delete>
+                                </tasks>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <failOnError>false</failOnError>
+                    </configuration>
+                </plugin>
+                <!-- These files are generated by the `flow-maven-plugin` goals below -->
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <configuration>
+                        <filesets>
+                            <fileset>
+                                <directory>${project.basedir}</directory>
+                                <includes>
+                                    <include>package*.json</include>
+                                    <include>webpack*.js</include>
+                                </includes>
+                            </fileset>
+                        </filesets>
+                    </configuration>
+                </plugin>
+                <!--This plugin's configuration is used to store Eclipse
+                    m2e settings only. It has no influence on the Maven build itself. -->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            com.lazerycode.selenium
+                                        </groupId>
+                                        <artifactId>
+                                            driver-binary-downloader-maven-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [${driver.binary.downloader.maven.plugin.version},)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>selenium</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore></ignore>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <configuration>
+                        <skipNexusStagingDeployMojo>true
+                        </skipNexusStagingDeployMojo>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>properties-maven-plugin</artifactId>
+                    <version>${properties-maven-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>validation</id>
+            <properties>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <test.excludegroup>com.vaadin.flow.testcategory.ScreenshotTests,
+                    com.vaadin.flow.testcategory.PushTests
+                </test.excludegroup>
+            </properties>
+        </profile>
+        <profile>
+            <id>all-tests</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <test.excludegroup></test.excludegroup>
+            </properties>
+        </profile>
+        <profile>
+            <id>ie11</id>
+            <activation>
+                <property>
+                    <!-- In BrowserStack tests are run on IE11 -->
+                    <name>test.use.browserstack</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <test.excludegroup>com.vaadin.flow.testcategory.IgnoreIE11,
+                    com.vaadin.flow.testcategory.PushTests
+                </test.excludegroup>
+            </properties>
+        </profile>
+    </profiles>
+
+</project>
+

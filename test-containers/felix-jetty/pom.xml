@@ -120,17 +120,17 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components-testbench</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-util</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
         </dependency>
     </dependencies>
     <build>

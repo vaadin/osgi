@@ -37,22 +37,22 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-client</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-dnd</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-util</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -68,7 +68,7 @@
         <dependency>
            <groupId>com.vaadin</groupId>
            <artifactId>flow-test-root-context-npm</artifactId>
-           <version>${project.version}</version>
+           <version>${flow.version}</version>
            <type>jar</type>
            <classifier>ui</classifier>
         </dependency>
@@ -76,13 +76,13 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-osgi</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-root-context-npm</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>

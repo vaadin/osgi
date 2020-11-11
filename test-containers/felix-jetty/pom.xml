@@ -192,7 +192,8 @@
                             <outputDirectory>${project.build.directory}/${felix.home}/bundle</outputDirectory>
                             <overWriteIfNewer>true</overWriteIfNewer>
                             <excludeGroupIds>com.google.code.findbugs,
-                                org.seleniumhq.selenium, javax.servlet</excludeGroupIds>
+                                org.seleniumhq.selenium, javax.servlet, com.github.jknack, com.github.fge, com.github.java-json-tools, io.swagger</excludeGroupIds>
+                            <excludeArtifactIds>slf4j-ext</excludeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>
@@ -247,7 +248,7 @@
                         <exclude>**/WaitHttpIT.java</exclude>
                     </excludes>
                     <dependenciesToScan>
-                        <dependency>${project.groupId}:flow-test-root-context</dependency>
+                        <dependency>${project.groupId}:flow-test-root-context-npm</dependency>
                     </dependenciesToScan>
                 </configuration>
             </plugin>
@@ -256,14 +257,47 @@
 
     <profiles>
         <profile>
-           <id>npm</id>
-           
-           <properties>
-                <vaadin.mode>-npm</vaadin.mode>
-           </properties>
-           
+            <id>local-run</id>
+            <activation>
+                <property>
+                    <name>!test.use.hub</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.lazerycode.selenium</groupId>
+                        <artifactId>driver-binary-downloader-maven-plugin
+                        </artifactId>
+                        <version>
+                            ${driver.binary.downloader.maven.plugin.version}
+                        </version>
+                        <configuration>
+                            <onlyGetDriversForHostOperatingSystem>true
+                            </onlyGetDriversForHostOperatingSystem>
+                            <rootStandaloneServerDirectory>
+                                ${project.rootdir}/driver
+                            </rootStandaloneServerDirectory>
+                            <downloadedZipFileDirectory>
+                                ${project.rootdir}/driver_zips
+                            </downloadedZipFileDirectory>
+                            <customRepositoryMap>
+                                ${project.rootdir}/drivers.xml
+                            </customRepositoryMap>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>selenium</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
-     </profiles>
+    </profiles>
 
 </project>
 

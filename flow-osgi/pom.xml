@@ -11,13 +11,22 @@
     <artifactId>flow-osgi</artifactId>
     <name>Flow OSGi Support</name>
     <packaging>jar</packaging>
+    
+    <licenses>
+        <license>
+            <name>Commercial Vaadin Developer License version 4.0</name>
+            <url>https://vaadin.com/license/cvdl-4.0</url>
+            <distribution>manual</distribution>
+        </license>
+    </licenses>
+
 
     <dependencies>
 
         <!-- Project dependencies -->
 
         <!-- API DEPENDENCIES -->
-         <dependency>
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>3.1.0</version>

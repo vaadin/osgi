@@ -22,6 +22,8 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 
 /**
+ * OSGi capable implementation of instantiator factory.
+ * 
  * @author Vaadin Ltd
  * @since
  *

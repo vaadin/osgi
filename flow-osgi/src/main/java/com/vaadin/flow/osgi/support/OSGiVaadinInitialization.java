@@ -48,6 +48,9 @@ import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.server.VaadinServletContext;
 
 /**
+ * Initialize {@link Lookup} and register internal resources (client engine
+ * resource and push resources).
+ * 
  * @author Vaadin Ltd
  * @since
  *

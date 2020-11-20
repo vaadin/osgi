@@ -18,6 +18,8 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.util.tracker.BundleTracker;
 
 /**
+ * Service to start bundle tracker.
+ * 
  * @author Vaadin Ltd
  * @since
  *
@@ -30,12 +32,21 @@ public class ServletContainerInitializerExtender {
     @Reference
     private ServletContainerInitializerClasses initializerClasses;
 
+    /**
+     * Activates the component.
+     * 
+     * @param context
+     *            the provided bundle context
+     */
     @Activate
     public void activate(BundleContext context) {
         tracker = new VaadinBundleTracker(context, initializerClasses);
         tracker.open();
     }
 
+    /**
+     * Deactivate the component.
+     */
     @Deactivate
     public void deactivate() {
         tracker.close();

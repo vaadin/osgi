@@ -14,7 +14,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <felix.version>6.0.0</felix.version>
+        <felix.version>6.0.3</felix.version>
         <felix.distribution>https://repo1.maven.org/maven2/org/apache/felix/org.apache.felix.main.distribution/${felix.version}/org.apache.felix.main.distribution-${felix.version}.zip</felix.distribution>
         <felix.home>felix-framework-${felix.version}</felix.home>
         <jetty.version>9.4.11.v20180605</jetty.version>

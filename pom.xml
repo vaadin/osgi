@@ -17,7 +17,6 @@
 
     <modules>
         <module>flow-osgi</module>
-        <module>test-containers</module>
     </modules>
 
     <organization>
@@ -386,9 +385,17 @@
     <profiles>
         <profile>
             <id>validation</id>
+            <activation>
+                <property>
+                    <name>!release</name>
+                </property>
+            </activation>
             <properties>
                 <maven.javadoc.skip>false</maven.javadoc.skip>
             </properties>
+            <modules>
+                <module>test-containers</module>
+            </modules>
         </profile>
         <profile>
             <id>java11</id>
@@ -463,12 +470,6 @@
                 </pluginManagement>
 
             </build>
-        </profile>
-        <profile>
-            <id>release</id>
-            <modules>
-                <module>flow-osgi</module>
-            </modules>
         </profile>
     </profiles>
 </project>

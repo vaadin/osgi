@@ -20,6 +20,7 @@ import java.util.Objects;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ServiceScope;
 
 import com.vaadin.flow.di.ResourceProvider;
 import com.vaadin.flow.server.VaadinServletService;
@@ -32,7 +33,8 @@ import com.vaadin.flow.server.VaadinServletService;
  * @since
  *
  */
-@Component
+@Component(scope = ServiceScope.SINGLETON, service = {
+        ResourceProvider.class }, immediate = true)
 public class OSGiResourceProvider implements ResourceProvider {
 
     @Override

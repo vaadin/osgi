@@ -12,6 +12,7 @@ package com.vaadin.flow.osgi.support;
 import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ServiceScope;
 
 import com.vaadin.flow.di.DefaultInstantiator;
 import com.vaadin.flow.di.Instantiator;
@@ -28,7 +29,8 @@ import com.vaadin.flow.server.VaadinServiceInitListener;
  * @since
  *
  */
-@Component(immediate = true, service = InstantiatorFactory.class)
+@Component(immediate = true, service = {
+        InstantiatorFactory.class }, scope = ServiceScope.SINGLETON)
 public class OSGiInstantiatorFactory implements InstantiatorFactory {
 
     private static final class OsgiInstantiator extends DefaultInstantiator

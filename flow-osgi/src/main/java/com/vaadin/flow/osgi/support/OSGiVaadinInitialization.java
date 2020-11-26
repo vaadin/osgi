@@ -9,9 +9,11 @@
  */
 package com.vaadin.flow.osgi.support;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
@@ -45,6 +47,7 @@ import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServiceInitListener;
+import com.vaadin.flow.server.VaadinServlet;
 import com.vaadin.flow.server.VaadinServletContext;
 
 /**
@@ -55,7 +58,7 @@ import com.vaadin.flow.server.VaadinServletContext;
  * @since
  *
  */
-@Component(service = { VaadinServiceInitListener.class,
+@Component(immediate = true, service = { VaadinServiceInitListener.class,
         HttpSessionListener.class,
         ServletContextListener.class }, scope = ServiceScope.SINGLETON, property = HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER
                 + "=true")
@@ -118,28 +121,7 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
 
         @Override
         public <T> Collection<T> lookupAll(Class<T> serviceClass) {
-            Bundle bundle = FrameworkUtil
-                    .getBundle(ServletContainerInitializerClasses.class);
-            try {
-                Collection<ServiceReference<T>> references = bundle
-                        .getBundleContext()
-                        .getServiceReferences(serviceClass, null);
-                List<T> services = new ArrayList<>(references.size());
-                for (ServiceReference<T> reference : references) {
-                    T service = bundle.getBundleContext().getService(reference);
-                    if (service != null) {
-                        services.add(service);
-                    }
-                }
-                return services;
-            } catch (InvalidSyntaxException e) {
-                LoggerFactory.getLogger(OsgiLookupImpl.class)
-                        .error("Unexpected invalid filter expression", e);
-                assert false : "Implementation error: Unexpected invalid filter exception is "
-                        + "thrown even though the service filter is null. Check the exception and update the impl";
-            }
-
-            return Collections.emptyList();
+            return OSGiVaadinInitialization.lookupAll(serviceClass);
         }
 
     }
@@ -204,9 +186,33 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
 
         VaadinServletContext context = new VaadinServletContext(servletContext);
         // ensure the context is set into the context
+
         context.getAttribute(Lookup.class, () -> new OsgiLookupImpl());
 
+        Collection<Servlet> servlets = lookupAll(Servlet.class);
+        for (Servlet servlet : servlets) {
+            if (isUninitializedServlet(servlet)) {
+                try {
+                    servlet.init(servlet.getServletConfig());
+                } catch (ServletException e) {
+                    LoggerFactory.getLogger(OSGiVaadinInitialization.class)
+                            .error("Couldn't initialize {} {}",
+                                    VaadinServlet.class.getSimpleName(),
+                                    servlet.getClass().getName(), e);
+                }
+            }
+        }
+
         initializerClasses.addContext(servletContext);
+    }
+
+    private boolean isUninitializedServlet(Object object) {
+        if (object instanceof VaadinServlet) {
+            VaadinServlet vaadinServlet = (VaadinServlet) object;
+            return vaadinServlet.getServletConfig() != null
+                    && vaadinServlet.getService() == null;
+        }
+        return false;
     }
 
     @Override
@@ -304,4 +310,27 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
         return builder.toString();
     }
 
+    private static <T> Collection<T> lookupAll(Class<T> serviceClass) {
+        Bundle bundle = FrameworkUtil.getBundle(OSGiVaadinInitialization.class);
+        try {
+            Collection<ServiceReference<T>> references = bundle
+                    .getBundleContext()
+                    .getServiceReferences(serviceClass, null);
+            List<T> services = new ArrayList<>(references.size());
+            for (ServiceReference<T> reference : references) {
+                T service = bundle.getBundleContext().getService(reference);
+                if (service != null) {
+                    services.add(service);
+                }
+            }
+            return services;
+        } catch (InvalidSyntaxException e) {
+            LoggerFactory.getLogger(OsgiLookupImpl.class)
+                    .error("Unexpected invalid filter expression", e);
+            assert false : "Implementation error: Unexpected invalid filter exception is "
+                    + "thrown even though the service filter is null. Check the exception and update the impl";
+        }
+
+        return Collections.emptyList();
+    }
 }

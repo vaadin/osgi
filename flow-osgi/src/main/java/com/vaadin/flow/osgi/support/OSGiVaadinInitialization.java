@@ -185,8 +185,8 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
         ServletContext servletContext = event.getServletContext();
 
         VaadinServletContext context = new VaadinServletContext(servletContext);
-        // ensure the context is set into the context
 
+        // ensure the lookup is set into the context
         context.getAttribute(Lookup.class, () -> new OsgiLookupImpl());
 
         Collection<Servlet> servlets = lookupAll(Servlet.class);

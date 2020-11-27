@@ -206,15 +206,6 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
         initializerClasses.addContext(servletContext);
     }
 
-    private boolean isUninitializedServlet(Object object) {
-        if (object instanceof VaadinServlet) {
-            VaadinServlet vaadinServlet = (VaadinServlet) object;
-            return vaadinServlet.getServletConfig() != null
-                    && vaadinServlet.getService() == null;
-        }
-        return false;
-    }
-
     @Override
     public void contextDestroyed(ServletContextEvent event) {
         initializerClasses.removeContext(event.getServletContext());
@@ -308,6 +299,15 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
             }
         }
         return builder.toString();
+    }
+
+    private boolean isUninitializedServlet(Object object) {
+        if (object instanceof VaadinServlet) {
+            VaadinServlet vaadinServlet = (VaadinServlet) object;
+            return vaadinServlet.getServletConfig() != null
+                    && vaadinServlet.getService() == null;
+        }
+        return false;
     }
 
     private static <T> Collection<T> lookupAll(Class<T> serviceClass) {

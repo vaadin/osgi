@@ -60,8 +60,13 @@ import com.vaadin.flow.server.VaadinServletContext;
  */
 @Component(immediate = true, service = { VaadinServiceInitListener.class,
         HttpSessionListener.class,
-        ServletContextListener.class }, scope = ServiceScope.SINGLETON, property = HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER
-                + "=true")
+        ServletContextListener.class }, scope = ServiceScope.SINGLETON, property = {
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER + "=true",
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT + "=(&("
+                        + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME
+                        + "=*) (!("
+                        + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME
+                        + "=vaadinResourcesContext.*)))" })
 public class OSGiVaadinInitialization implements VaadinServiceInitListener,
         HttpSessionListener, ServletContextListener {
 
@@ -187,11 +192,18 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
         VaadinServletContext context = new VaadinServletContext(servletContext);
 
         // ensure the lookup is set into the context
-        context.getAttribute(Lookup.class, () -> new OsgiLookupImpl());
+        Lookup lookup = context.getAttribute(Lookup.class,
+                () -> new OsgiLookupImpl());
 
         Collection<Servlet> servlets = lookupAll(Servlet.class);
         for (Servlet servlet : servlets) {
             if (isUninitializedServlet(servlet)) {
+                ServletContext ctx = servlet.getServletConfig()
+                        .getServletContext();
+                if (new VaadinServletContext(ctx)
+                        .getAttribute(Lookup.class) != lookup) {
+                    continue;
+                }
                 try {
                     servlet.init(servlet.getServletConfig());
                 } catch (ServletException e) {
@@ -250,7 +262,8 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
     }
 
     private String generateUniqueContextName(String contextPath) {
-        String name = "vaadinContext." + sanitizeContextName(contextPath);
+        String name = "vaadinResourcesContext."
+                + sanitizeContextName(contextPath);
         Set<String> contextNames = getAvailableContextNames();
         if (contextNames.contains(name)) {
             int i = 1;

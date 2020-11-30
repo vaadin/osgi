@@ -39,6 +39,7 @@ import com.vaadin.flow.internal.AnnotationReader;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.router.HasErrorParameter;
+import com.vaadin.flow.server.InvalidApplicationConfigurationException;
 import com.vaadin.flow.server.startup.ClassLoaderAwareServletContainerInitializer;
 import com.vaadin.flow.server.startup.DevModeInitializer;
 import com.vaadin.flow.server.startup.LookupInitializer;
@@ -105,7 +106,22 @@ public final class ServletContainerInitializerClasses {
     public void addScannedClasses(
             Map<Long, Collection<Class<?>>> extenderClasses) {
         cachedClasses.putAll(extenderClasses);
-        contexts.forEach(this::resetContextInitializers);
+        List<InvalidApplicationConfigurationException> thrown = new ArrayList<>();
+        for (ServletContext context : contexts) {
+            try {
+                resetContextInitializers(context);
+            } catch (InvalidApplicationConfigurationException exception) {
+                // don't stop context initializers processing for different
+                // context, instead initialize all the contexts and then throw
+                thrown.add(exception);
+            }
+        }
+        // Now if there was an exception throw it.
+        // This is a workaround for #9417 which causes an exception being thrown
+        // by VaadinAppShellInitializer in our ITs
+        if (!thrown.isEmpty()) {
+            throw thrown.get(0);
+        }
     }
 
     /**

@@ -15,12 +15,22 @@
  */
 package com.vaadin.flow.osgi;
 
+import java.net.URISyntaxException;
+
 import com.vaadin.flow.uitest.ui.BaseHrefIT;
 
 public class CustomContextBaseHrefIT extends BaseHrefIT {
 
     @Override
     protected String getTestPath() {
-        return "/custom-test-context" + super.getTestPath();
+        return "/custom-test-context/view/com.vaadin.flow.uitest.ui.BaseHrefView";
     }
+
+    @Override
+    public void testBaseHref() throws URISyntaxException {
+        super.testBaseHref();
+
+        checkLogsForErrors();
+    }
+
 }

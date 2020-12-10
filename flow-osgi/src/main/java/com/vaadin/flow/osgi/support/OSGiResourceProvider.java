@@ -15,15 +15,15 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Objects;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
 import com.vaadin.flow.di.ResourceProvider;
-import com.vaadin.flow.server.VaadinServletService;
 
 /**
  * OSGi capable implementation of {@link ResourceProvider}.
@@ -33,40 +33,24 @@ import com.vaadin.flow.server.VaadinServletService;
  * @since
  *
  */
-@Component(scope = ServiceScope.SINGLETON, service = {
-        ResourceProvider.class }, immediate = true)
+@Component(scope = ServiceScope.BUNDLE, service = { ResourceProvider.class })
 public class OSGiResourceProvider implements ResourceProvider {
 
-    @Override
-    public URL getApplicationResource(Class<?> clazz, String path) {
-        return FrameworkUtil.getBundle(Objects.requireNonNull(clazz))
-                .getResource(path);
+    private Bundle bundle;
+
+    @Activate
+    void activate(ComponentContext ctx) {
+        bundle = ctx.getUsingBundle();
+        System.out.println("kjkkkkkkkkkkkk " + bundle);
     }
 
     @Override
-    public URL getApplicationResource(Object context, String path) {
-        Class<?> appClass = getApplicationClass(context);
-        if (appClass == null) {
-            return null;
-        }
-        return getApplicationResource(appClass, path);
+    public URL getApplicationResource(String path) {
+        return bundle.getResource(path);
     }
 
     @Override
-    public List<URL> getApplicationResources(Object context, String path)
-            throws IOException {
-        Class<?> appClass = getApplicationClass(context);
-        if (appClass == null) {
-            return Collections.emptyList();
-        }
-        return getApplicationResources(appClass, path);
-
-    }
-
-    @Override
-    public List<URL> getApplicationResources(Class<?> clazz, String path)
-            throws IOException {
-        Bundle bundle = FrameworkUtil.getBundle(Objects.requireNonNull(clazz));
+    public List<URL> getApplicationResources(String path) throws IOException {
         Enumeration<URL> resources = bundle.getResources(path);
         if (resources == null) {
             return Collections.emptyList();
@@ -93,15 +77,4 @@ public class OSGiResourceProvider implements ResourceProvider {
         return getClientResource(path).openStream();
     }
 
-    private Class<?> getApplicationClass(Object context) {
-        Class<?> clazz = Objects.requireNonNull(context).getClass();
-        if (context instanceof VaadinServletService) {
-            clazz = ((VaadinServletService) context).getServlet().getClass();
-        }
-        if (!"com.vaadin.flow.server"
-                .equals(FrameworkUtil.getBundle(clazz).getSymbolicName())) {
-            return clazz;
-        }
-        return null;
-    }
 }

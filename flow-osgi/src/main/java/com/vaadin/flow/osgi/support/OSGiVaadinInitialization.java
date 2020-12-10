@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleReference;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceFactory;
@@ -43,6 +44,8 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.di.Lookup;
+import com.vaadin.flow.internal.ApplicationClassLoaderAccess;
+import com.vaadin.flow.internal.VaadinContextInitializer;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
@@ -108,25 +111,67 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
 
     }
 
+    private static class IllegalContextState extends Exception {
+
+        private IllegalContextState(String msg) {
+            super(msg);
+        }
+
+    }
+
     private static class OsgiLookupImpl implements Lookup {
+
+        private final VaadinServletContext context;
+
+        private final Bundle webAppBundle;
+
+        private OsgiLookupImpl(VaadinServletContext context)
+                throws IllegalContextState {
+            this.context = context;
+            webAppBundle = findBundle();
+            System.out.println("xxxxxxxxxxxxx " + webAppBundle);
+        }
 
         @Override
         public <T> T lookup(Class<T> serviceClass) {
-            Bundle bundle = FrameworkUtil
-                    .getBundle(ServletContainerInitializerClasses.class);
-            ServiceReference<T> reference = bundle.getBundleContext()
+            ServiceReference<T> reference = getWebAppBundle().getBundleContext()
                     .getServiceReference(serviceClass);
             if (reference == null) {
                 LoggerFactory.getLogger(OsgiLookupImpl.class)
                         .debug("No service found for '{}' SPI", serviceClass);
                 return null;
             }
-            return bundle.getBundleContext().getService(reference);
+            return getWebAppBundle().getBundleContext().getService(reference);
         }
 
         @Override
         public <T> Collection<T> lookupAll(Class<T> serviceClass) {
-            return OSGiVaadinInitialization.lookupAll(serviceClass);
+            return OSGiVaadinInitialization.lookupAll(getWebAppBundle(),
+                    serviceClass);
+        }
+
+        private Bundle getWebAppBundle() {
+            return webAppBundle;
+        }
+
+        private Bundle findBundle() throws IllegalContextState {
+            ApplicationClassLoaderAccess classLoaderAccess = context
+                    .getAttribute(ApplicationClassLoaderAccess.class);
+            if (classLoaderAccess == null) {
+                throw new IllegalContextState(
+                        ApplicationClassLoaderAccess.class.getName()
+                                + "' instance is not available in "
+                                + VaadinContext.class.getName());
+            }
+            ClassLoader classloader = classLoaderAccess.getClassloader();
+
+            if (classloader instanceof BundleReference) {
+                return ((BundleReference) classloader).getBundle();
+            } else {
+                throw new IllegalStateException(
+                        "Unexpected classloader for the web app '" + classloader
+                                + "'. It's not possible to get an OSGi bundle from it");
+            }
         }
 
     }
@@ -191,11 +236,64 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
 
         VaadinServletContext context = new VaadinServletContext(servletContext);
 
-        // ensure the lookup is set into the context
-        Lookup lookup = context.getAttribute(Lookup.class,
-                () -> new OsgiLookupImpl());
+        ApplicationClassLoaderAccess classLoaderAccess = context
+                .getAttribute(ApplicationClassLoaderAccess.class);
+        context.getAttribute(VaadinContextInitializer.class,
+                () -> (VaadinContextInitializer) this::initContext);
 
-        Collection<Servlet> servlets = lookupAll(Servlet.class);
+        if (classLoaderAccess != null) {
+            initContext(context);
+        }
+    }
+
+    private void initContext(VaadinContext context) {
+        context.removeAttribute(VaadinContextInitializer.class);
+        VaadinServletContext servletContext = (VaadinServletContext) context;
+
+        /*
+         * There are two cases:
+         * 
+         * - the servlet context is initialized before all of the Servlets or
+         * 
+         * - after at least one of the servlets with the same context.
+         * 
+         * SevletContext::getClassLoader doesn't return the container the web
+         * app classloader for the servlet context instance here (in the
+         * "contextInitialized" method). It returns the web app classloader for
+         * the servlet context which is passed to the Servlet::init method: in
+         * fact two servlet context instances are different even though they
+         * share the same attributes and values. So to be able to identify the
+         * servlet context (which is coming from Servlet) and the
+         * "servletContext" instance here the Lookupx instance is used which is
+         * set as an attribute and if the context "is the same" the attributes
+         * should be the same.
+         */
+
+        // at this point at least one of the Servlet::init method should be
+        // called and the classloader should be available
+
+        // ensure the lookup is set into the context
+
+        Lookup lookup = context.getAttribute(Lookup.class, () -> {
+            try {
+                return new OsgiLookupImpl(servletContext);
+            } catch (IllegalContextState exception) {
+                LoggerFactory.getLogger(OSGiVaadinInitialization.class)
+                        .warn("Couldn't create a lookup", exception);
+                return null;
+            }
+        });
+        if (lookup == null) {
+            throw new IllegalStateException(
+                    VaadinContextInitializer.class.getSimpleName()
+                            + " has been executed but there is no "
+                            + ApplicationClassLoaderAccess.class.getSimpleName()
+                            + " instance available");
+        }
+
+        Collection<Servlet> servlets = lookupAll(
+                FrameworkUtil.getBundle(OSGiVaadinInitialization.class),
+                Servlet.class);
         for (Servlet servlet : servlets) {
             if (isUninitializedServlet(servlet)) {
                 ServletContext ctx = servlet.getServletConfig()
@@ -215,7 +313,7 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
             }
         }
 
-        initializerClasses.addContext(servletContext);
+        initializerClasses.addContext(servletContext.getContext());
     }
 
     @Override
@@ -323,8 +421,8 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
         return false;
     }
 
-    private static <T> Collection<T> lookupAll(Class<T> serviceClass) {
-        Bundle bundle = FrameworkUtil.getBundle(OSGiVaadinInitialization.class);
+    private static <T> Collection<T> lookupAll(Bundle bundle,
+            Class<T> serviceClass) {
         try {
             Collection<ServiceReference<T>> references = bundle
                     .getBundleContext()

@@ -41,7 +41,6 @@ public class OSGiResourceProvider implements ResourceProvider {
     @Activate
     void activate(ComponentContext ctx) {
         bundle = ctx.getUsingBundle();
-        System.out.println("kjkkkkkkkkkkkk " + bundle);
     }
 
     @Override

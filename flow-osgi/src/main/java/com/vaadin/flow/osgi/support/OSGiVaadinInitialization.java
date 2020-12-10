@@ -129,7 +129,6 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
                 throws IllegalContextState {
             this.context = context;
             webAppBundle = findBundle();
-            System.out.println("xxxxxxxxxxxxx " + webAppBundle);
         }
 
         @Override

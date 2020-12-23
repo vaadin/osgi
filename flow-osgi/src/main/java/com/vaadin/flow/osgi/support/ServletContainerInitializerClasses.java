@@ -200,13 +200,6 @@ public final class ServletContainerInitializerClasses {
                     "Couldn't run servlet context initializer "
                             + initializer.getClass(),
                     e);
-        } catch (InvalidApplicationConfigurationException exception) {
-            // this is a temporary solution to avoid exception from
-            // VaadinAppShellInitializer in our ITs. At the moment it's not
-            // possible to configure the IT project to avoid the exception
-            LoggerFactory.getLogger(ServletContainerInitializerClasses.class)
-                    .error("The application is configured incorrectly",
-                            exception);
         }
     }
 

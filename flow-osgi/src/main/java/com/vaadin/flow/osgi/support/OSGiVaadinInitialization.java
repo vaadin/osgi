@@ -162,7 +162,7 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
 
         private final Bundle webAppBundle;
 
-        private final VaadinServletContext context;
+        private final VaadinServletContext servletContext;
 
         private final ServletContainerInitializerClasses initializerClasses;
 
@@ -173,7 +173,7 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
             super(webAppBundle.getBundleContext(),
                     ApplicationConfigurationFactory.class, null);
             this.webAppBundle = webAppBundle;
-            this.context = context;
+            servletContext = context;
             this.initializerClasses = initializerClasses;
         }
 
@@ -182,11 +182,11 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
                 ServiceReference<ApplicationConfigurationFactory> reference) {
             ApplicationConfigurationFactory factory = super.addingService(
                     reference);
-            AppConfigFactoryTracker tracker = context
+            AppConfigFactoryTracker tracker = servletContext
                     .getAttribute(AppConfigFactoryTracker.class);
             if (tracker != null) {
                 tracker.close();
-                context.removeAttribute(AppConfigFactoryTracker.class);
+                servletContext.removeAttribute(AppConfigFactoryTracker.class);
             }
             initializeLookup();
             return factory;
@@ -217,7 +217,7 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
             // called and the classloader should be available
 
             // ensure the lookup is set into the context
-            Lookup lookup = context.getAttribute(Lookup.class,
+            Lookup lookup = servletContext.getAttribute(Lookup.class,
                     this::createLookup);
             if (lookup == null) {
                 throw new IllegalStateException(
@@ -237,7 +237,7 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
                 }
             }
 
-            initializerClasses.addContext(context.getContext());
+            initializerClasses.addContext(servletContext.getContext());
         }
 
         private void handleUninitializedServlet(Lookup lookup,
@@ -258,7 +258,7 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
         }
 
         private Lookup createLookup() {
-            return new OsgiLookupImpl(webAppBundle, context);
+            return new OsgiLookupImpl(webAppBundle, servletContext);
         }
 
         private boolean isUninitializedServlet(Object object) {

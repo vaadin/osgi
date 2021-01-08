@@ -22,6 +22,25 @@
     </properties>
 
     <dependencies>
+    
+        <!--  test views dependencies -->
+        <dependency>
+           <groupId>com.vaadin</groupId>
+           <artifactId>flow-test-root-context-npm</artifactId>
+           <version>${flow.version}</version>
+           <type>jar</type>
+           <classifier>ui</classifier>
+        </dependency>
+        
+        <!--  its views dependencies -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-test-root-context-npm</artifactId>
+            <version>${flow.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        
 
         <dependency>
             <groupId>net.bytebuddy</groupId>

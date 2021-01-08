@@ -32,6 +32,7 @@
 
     <modules>
         <module>felix-jetty</module>
+        <module>bnd-tools-smoke-test</module>
     </modules>
 
     <dependencies>
@@ -68,25 +69,9 @@
         </dependency>
 
         <dependency>
-           <groupId>com.vaadin</groupId>
-           <artifactId>flow-test-root-context-npm</artifactId>
-           <version>${flow.version}</version>
-           <type>jar</type>
-           <classifier>ui</classifier>
-        </dependency>
-
-        <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-osgi</artifactId>
             <version>${flow.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-test-root-context-npm</artifactId>
-            <version>${flow.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
         </dependency>
 
         <dependency>

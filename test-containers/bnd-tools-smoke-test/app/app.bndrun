@@ -5,7 +5,6 @@
 -runvm: ${def;argLine}
 
 -runproperties: \
-        org.apache.felix.http.host=localhost,\
         org.osgi.service.http.port=8888,\
         org.osgi.framework.bootdelegation=sun.reflect,\
         osgi.console=

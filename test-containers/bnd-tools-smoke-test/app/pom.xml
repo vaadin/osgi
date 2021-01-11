@@ -263,9 +263,10 @@
                             <async>true</async>
                             <asyncDestroyOnShutdown>true</asyncDestroyOnShutdown>
                             <workingDirectory>${project.build.directory}</workingDirectory>
-                            <commandlineArgs>
-                                -jar
-                                app.jar</commandlineArgs>
+                            <arguments>
+                                <argument>-jar</argument>
+                                <argument>app.jar</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                 </executions>

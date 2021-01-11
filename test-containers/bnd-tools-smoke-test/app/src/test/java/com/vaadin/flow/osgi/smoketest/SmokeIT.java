@@ -16,8 +16,10 @@
 package com.vaadin.flow.osgi.smoketest;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -62,14 +64,23 @@ public class SmokeIT extends ChromeBrowserTest {
 
     private void waitViewUrl(int count)
             throws MalformedURLException, InterruptedException {
-        String viewUrl = getRootURL() + "/view";
+        String viewUrl = getTestURL();
         if (count == 0) {
             throw new IllegalStateException(
                     "URL '" + viewUrl + "' is not avialable");
         }
         URL url = new URL(viewUrl);
         try {
-            url.openConnection();
+            URLConnection connection = url.openConnection();
+            if (connection instanceof HttpURLConnection) {
+                int responseCode = ((HttpURLConnection) connection)
+                        .getResponseCode();
+                if (HttpURLConnection.HTTP_OK != responseCode) {
+                    throw new IOException();
+                }
+            } else {
+                throw new IOException();
+            }
         } catch (IOException exception) {
             Thread.sleep(1000);
             waitViewUrl(count - 1);

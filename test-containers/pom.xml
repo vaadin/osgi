@@ -31,7 +31,7 @@
     </properties>
 
     <modules>
-        <module>felix-jetty</module>
+        <!--module>felix-jetty</module-->
         <module>bnd-tools-smoke-test</module>
     </modules>
 

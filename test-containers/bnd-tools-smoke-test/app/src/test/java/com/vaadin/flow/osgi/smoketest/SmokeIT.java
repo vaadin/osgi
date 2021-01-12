@@ -49,7 +49,7 @@ public class SmokeIT extends ChromeBrowserTest {
         // separate JVM and no one waits for its readiness.
         // As a result IT tests starts immediately and this workaround is used
         // to wait when HTTP server starts to handle HTTP requests.
-        waitViewUrl(60);
+        waitRootUrl(60);
 
         super.checkIfServerAvailable();
 
@@ -61,7 +61,7 @@ public class SmokeIT extends ChromeBrowserTest {
         Assert.assertTrue(isElementPresent(By.id("info")));
     }
 
-    private void waitViewUrl(int count)
+    private void waitRootUrl(int count)
             throws MalformedURLException, InterruptedException {
         String rootUrl = getRootURL();
         if (count == 0) {
@@ -74,7 +74,7 @@ public class SmokeIT extends ChromeBrowserTest {
             connection.connect();
         } catch (IOException exception) {
             Thread.sleep(1000);
-            waitViewUrl(count - 1);
+            waitRootUrl(count - 1);
         }
     }
 }

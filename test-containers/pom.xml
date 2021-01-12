@@ -30,10 +30,6 @@
         <driver.binary.downloader.maven.plugin.version>1.0.17</driver.binary.downloader.maven.plugin.version>
     </properties>
 
-    <modules>
-        <module>felix-jetty</module>
-    </modules>
-
     <dependencies>
         <!-- Project dependencies -->
         <dependency>
@@ -68,25 +64,9 @@
         </dependency>
 
         <dependency>
-           <groupId>com.vaadin</groupId>
-           <artifactId>flow-test-root-context-npm</artifactId>
-           <version>${flow.version}</version>
-           <type>jar</type>
-           <classifier>ui</classifier>
-        </dependency>
-
-        <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-osgi</artifactId>
             <version>${flow.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-test-root-context-npm</artifactId>
-            <version>${flow.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -287,7 +267,34 @@
                 </test.excludegroup>
             </properties>
         </profile>
+        <profile>
+            <!-- This profile and the next one "bnd-tools" should be mutually 
+            exclusive and should NOT be executed in the same maven run!
+            The problem is: they both use execution maven plugin to start the OSGi container
+            which doesn't stop when ITs are finished. It stops only when (maven) JVM exits.
+            As a result one container will still be active when ITs from another 
+            module starts. That will not allow another OSGi container starts. 
+            -->
+            <id>felix-jetty</id>
+            <modules>
+                <module>felix-jetty</module>
+            </modules>
+        </profile>
+        <profile>
+            <!-- This profile and the above one "felix-jetty" should be mutually 
+            exclusive and should NOT be executed in the same maven run!
+            The problem is: they both use execution maven plugin to start the OSGi container
+            which doesn't stop when ITs are finished. It stops only when (maven) JVM exits.
+            As a result one container will still be active when ITs from another 
+            module starts. That will not allow another OSGi container starts. 
+            -->
+            <id>bnd-tools</id>
+            <modules>
+                <module>bnd-tools-smoke-test</module>
+            </modules>
+        </profile>
     </profiles>
+    
 
 </project>
 

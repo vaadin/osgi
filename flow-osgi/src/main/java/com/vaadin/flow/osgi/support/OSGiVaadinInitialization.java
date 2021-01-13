@@ -17,6 +17,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,6 +29,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -47,13 +52,16 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.internal.ApplicationClassLoaderAccess;
 import com.vaadin.flow.internal.VaadinContextInitializer;
+import com.vaadin.flow.server.AbstractConfiguration;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.server.VaadinServlet;
 import com.vaadin.flow.server.VaadinServletContext;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.flow.server.startup.ApplicationConfigurationFactory;
+import com.vaadin.pro.licensechecker.LicenseChecker;
 
 /**
  * Initialize {@link Lookup} and register internal resources (client engine
@@ -79,6 +87,10 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
     private ServletContainerInitializerClasses initializerClasses;
 
     private static final VaadinServletMarker MARKER_INSTANCE = new VaadinServletMarker();
+
+    private static final String PROJECT_NAME = "vaadin-osgi";
+
+    private static final String VERSION = readVersion();
 
     private static final class VaadinServletMarker {
     }
@@ -228,6 +240,8 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
                                 + " instance available");
             }
 
+            checkLicense(ApplicationConfiguration.get(servletContext));
+
             Collection<Servlet> servlets = lookupAll(
                     FrameworkUtil.getBundle(OSGiVaadinInitialization.class),
                     Servlet.class);
@@ -276,6 +290,9 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
     public void serviceInit(ServiceInitEvent event) {
         VaadinService service = event.getSource();
         VaadinContext context = service.getContext();
+
+        checkLicense(service.getDeploymentConfiguration());
+
         // associate servlet context with Vaadin servlet/service
         context.setAttribute(VaadinServletMarker.class, MARKER_INSTANCE);
 
@@ -507,5 +524,29 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
                     "Unexpected classloader for the web app '" + classloader
                             + "'. It's not possible to get an OSGi bundle from it");
         }
+    }
+
+    private static void checkLicense(AbstractConfiguration configuration) {
+        if (!configuration.isProductionMode()) {
+            LicenseChecker.checkLicense(PROJECT_NAME, VERSION);
+        }
+    }
+
+    private static String readVersion() {
+        URL versionUrl = FrameworkUtil.getBundle(OSGiVaadinInitialization.class)
+                .getResource("vaadin-osgi-version.properties");
+        if (versionUrl == null) {
+            throw new RuntimeException(
+                    "Couldn't find 'vaadin-osgi-version.properties' file in the bundle");
+        }
+        Properties properties = new Properties();
+        try (InputStream stream = versionUrl.openStream()) {
+            properties.load(stream);
+        } catch (IOException exception) {
+            throw new UncheckedIOException(
+                    "Couldn't read the 'vaadin-osgi-version.properties' file",
+                    exception);
+        }
+        return properties.getProperty("vaadin.osgi.version");
     }
 }

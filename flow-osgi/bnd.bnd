@@ -3,7 +3,7 @@ Bundle-Name: Vaadin Flow OSGi Support
 Bundle-Version: ${osgi.bundle.version}
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-License: http://www.apache.org/licenses/LICENSE-2.0
-Export-Package: com.vaadin.flow.osgi.support*
+Export-Package: com.vaadin.flow.osgi.support.servlet*
 Import-Package: org.osgi.framework;version='[1.8,2)',\
     org.osgi.service.http.context;version='[1.0,2)',\
     *

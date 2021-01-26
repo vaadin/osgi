@@ -18,17 +18,18 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.LoggerFactory;
 
@@ -45,13 +46,55 @@ import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.flow.server.startup.ApplicationConfigurationFactory;
 
 class AppConfigFactoryTracker extends
-        ServiceTracker<ApplicationConfigurationFactory, ApplicationConfigurationFactory> {
+        ServiceTracker<ApplicationConfigurationFactory, ApplicationConfigurationFactory>
+        implements BundleListener {
 
     private final Bundle webAppBundle;
 
     private final VaadinServletContext servletContext;
 
     private final ServletContainerInitializerClasses initializerClasses;
+
+    private static class ResourceBoundleTracker extends BundleTracker<Bundle>
+            implements BundleListener {
+
+        private final Dictionary<String, String> properties;
+
+        private final String symbolicName;
+
+        private ResourceBoundleTracker(Bundle bundle, String symbolicName,
+                Dictionary<String, String> props) {
+            super(bundle.getBundleContext(), Bundle.ACTIVE | Bundle.RESOLVED,
+                    null);
+            properties = props;
+            this.symbolicName = symbolicName;
+            bundle.getBundleContext().addBundleListener(this);
+        }
+
+        @Override
+        public Bundle addingBundle(Bundle bundle, BundleEvent event) {
+            Bundle result = super.addingBundle(bundle, event);
+            if ((bundle.getState() & Bundle.ACTIVE) != 0
+                    && symbolicName.equals(bundle.getSymbolicName())) {
+                bundle.getBundleContext().registerService(ResourceService.class,
+                        new ResourceService(), properties);
+                stop();
+            }
+            return result;
+        }
+
+        @Override
+        public void bundleChanged(BundleEvent event) {
+            if ((event.getType() & BundleEvent.STOPPED) != 0) {
+                stop();
+            }
+        }
+
+        private void stop() {
+            close();
+            context.removeBundleListener(this);
+        }
+    }
 
     static class OsgiLookupImpl implements Lookup {
 
@@ -97,6 +140,7 @@ class AppConfigFactoryTracker extends
         this.webAppBundle = webAppBundle;
         servletContext = context;
         this.initializerClasses = initializerClasses;
+        webAppBundle.getBundleContext().addBundleListener(this);
     }
 
     @Override
@@ -107,11 +151,23 @@ class AppConfigFactoryTracker extends
         AppConfigFactoryTracker tracker = servletContext
                 .getAttribute(AppConfigFactoryTracker.class);
         if (tracker != null) {
-            tracker.close();
+            stop();
             servletContext.removeAttribute(AppConfigFactoryTracker.class);
         }
         initializeLookup();
         return factory;
+    }
+
+    @Override
+    public void bundleChanged(BundleEvent event) {
+        if ((event.getType() & BundleEvent.STOPPED) != 0) {
+            stop();
+        }
+    }
+
+    private void stop() {
+        close();
+        context.removeBundleListener(this);
     }
 
     private void initializeLookup() {
@@ -227,8 +283,13 @@ class AppConfigFactoryTracker extends
     }
 
     private String generateUniqueContextName(String contextPath) {
-        String name = "vaadinResourcesContext."
-                + sanitizeContextName(contextPath);
+        String contextName = sanitizeContextName(contextPath);
+        String name;
+        if (contextName.isEmpty()) {
+            name = "vaadinResourcesContext";
+        } else {
+            name = "vaadinResourcesContext." + contextName;
+        }
         Set<String> contextNames = getAvailableContextNames();
         if (contextNames.contains(name)) {
             int i = 1;
@@ -265,9 +326,10 @@ class AppConfigFactoryTracker extends
         clientProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
                 "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "="
                         + contextName + ")");
-        getBundle("com.vaadin.flow.client").ifPresent(bundle -> bundle
-                .getBundleContext().registerService(ResourceService.class,
-                        new ResourceService(), clientProps));
+
+        ResourceBoundleTracker resourceBoundleTracker = new ResourceBoundleTracker(
+                webAppBundle, "com.vaadin.flow.client", clientProps);
+        resourceBoundleTracker.open();
     }
 
     private void registerPushResources(String contextName) {
@@ -279,18 +341,10 @@ class AppConfigFactoryTracker extends
         pushProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
                 "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "="
                         + contextName + ")");
-        getBundle("com.vaadin.flow.push").ifPresent(bundle -> bundle
-                .getBundleContext().registerService(ResourceService.class,
-                        new ResourceService(), pushProps));
-    }
 
-    private Optional<Bundle> getBundle(String symbolicName) {
-        BundleContext bundleContext = FrameworkUtil
-                .getBundle(OSGiVaadinInitialization.class).getBundleContext();
-        return Stream.of(bundleContext.getBundles())
-                .filter(bundle -> (bundle.getState() & Bundle.ACTIVE) != 0)
-                .filter(bundle -> symbolicName.equals(bundle.getSymbolicName()))
-                .findFirst();
+        ResourceBoundleTracker resourceBoundleTracker = new ResourceBoundleTracker(
+                webAppBundle, "com.vaadin.flow.push", pushProps);
+        resourceBoundleTracker.open();
     }
 
     private Set<String> getAvailableContextNames() {

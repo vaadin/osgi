@@ -66,7 +66,7 @@ import com.vaadin.pro.licensechecker.LicenseChecker;
                         + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME
                         + "=*) (!("
                         + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME
-                        + "=vaadinResourcesContext.*)))" })
+                        + "=vaadinResourcesContext*)))" })
 public class OSGiVaadinInitialization implements VaadinServiceInitListener,
         HttpSessionListener, ServletContextListener {
 
@@ -185,8 +185,8 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
     public void contextDestroyed(ServletContextEvent event) {
         initializerClasses.removeContext(event.getServletContext());
 
-        VaadinServletContext servletContext = (VaadinServletContext) event
-                .getServletContext();
+        VaadinServletContext servletContext = new VaadinServletContext(
+                event.getServletContext());
 
         AppConfigFactoryTracker tracker = servletContext
                 .getAttribute(AppConfigFactoryTracker.class);

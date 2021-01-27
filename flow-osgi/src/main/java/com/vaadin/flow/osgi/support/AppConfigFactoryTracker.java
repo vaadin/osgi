@@ -213,7 +213,7 @@ class AppConfigFactoryTracker extends
         // called and the classloader should be available
 
         // ensure the lookup is set into the context
-        Lookup created[] = new Lookup[1];
+        Lookup[] created = new Lookup[1];
         Lookup lookup = servletContext.getAttribute(Lookup.class, () -> {
             Lookup result = new OsgiLookupImpl(webAppBundle, servletContext);
             created[0] = result;

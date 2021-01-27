@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.internal.ApplicationClassLoaderAccess;
 import com.vaadin.flow.internal.VaadinContextInitializer;
-import com.vaadin.flow.osgi.support.OSGiVaadinInitialization.IllegalContextState;
 import com.vaadin.flow.osgi.support.OSGiVaadinInitialization.ResourceContextHelperFactory;
 import com.vaadin.flow.osgi.support.OSGiVaadinInitialization.ResourceService;
 import com.vaadin.flow.server.VaadinContext;
@@ -45,6 +44,16 @@ import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.flow.server.startup.ApplicationConfigurationFactory;
 
+/**
+ * Internal implementation class.
+ * <p>
+ * Initializes the {@link Lookup} instance for the {@link VaadinServletContext}
+ * as soon as {@link ApplicationConfigurationFactory} service is registered.
+ * 
+ * @author Vaadin Ltd
+ * @since
+ *
+ */
 class AppConfigFactoryTracker extends
         ServiceTracker<ApplicationConfigurationFactory, ApplicationConfigurationFactory>
         implements BundleListener {
@@ -55,14 +64,14 @@ class AppConfigFactoryTracker extends
 
     private final ServletContainerInitializerClasses initializerClasses;
 
-    private static class ResourceBoundleTracker extends BundleTracker<Bundle>
+    private static class ResourceBundleTracker extends BundleTracker<Bundle>
             implements BundleListener {
 
         private final Dictionary<String, String> properties;
 
         private final String symbolicName;
 
-        private ResourceBoundleTracker(Bundle bundle, String symbolicName,
+        private ResourceBundleTracker(Bundle bundle, String symbolicName,
                 Dictionary<String, String> props) {
             super(bundle.getBundleContext(), Bundle.ACTIVE | Bundle.RESOLVED,
                     null);
@@ -132,9 +141,19 @@ class AppConfigFactoryTracker extends
 
     }
 
+    /**
+     * Creates a new tracker instance for the {@code webAppBundle} and Vaadin
+     * {@code context}.
+     * 
+     * @param webAppBundle
+     *            the web application bundle
+     * @param context
+     *            the Vaadin servlet context
+     * @param initializerClasses
+     *            {@link ServletContainerInitializerClasses} instance
+     */
     AppConfigFactoryTracker(Bundle webAppBundle, VaadinServletContext context,
-            ServletContainerInitializerClasses initializerClasses)
-            throws IllegalContextState {
+            ServletContainerInitializerClasses initializerClasses) {
         super(webAppBundle.getBundleContext(),
                 ApplicationConfigurationFactory.class, null);
         this.webAppBundle = webAppBundle;
@@ -304,6 +323,15 @@ class AppConfigFactoryTracker extends
         }
     }
 
+    /**
+     * Uses {@code suggestedName} as a basis to produce a context name with
+     * "osgi.http.whiteboard.context.name" property via filtering via
+     * "osgi.http.whiteboard.context.select".
+     * 
+     * @param suggestedName
+     *            the basis to produce a context name
+     * @return a name which can be used as a context name
+     */
     private String sanitizeContextName(String suggestedName) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < suggestedName.length(); i++) {
@@ -327,7 +355,7 @@ class AppConfigFactoryTracker extends
                 "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "="
                         + contextName + ")");
 
-        ResourceBoundleTracker resourceBoundleTracker = new ResourceBoundleTracker(
+        ResourceBundleTracker resourceBoundleTracker = new ResourceBundleTracker(
                 webAppBundle, "com.vaadin.flow.client", clientProps);
         resourceBoundleTracker.open();
     }
@@ -342,7 +370,7 @@ class AppConfigFactoryTracker extends
                 "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "="
                         + contextName + ")");
 
-        ResourceBoundleTracker resourceBoundleTracker = new ResourceBoundleTracker(
+        ResourceBundleTracker resourceBoundleTracker = new ResourceBundleTracker(
                 webAppBundle, "com.vaadin.flow.push", pushProps);
         resourceBoundleTracker.open();
     }

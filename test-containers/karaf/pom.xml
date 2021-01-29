@@ -157,6 +157,9 @@
         </profile>
         <profile>
             <id>runITs</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -176,7 +179,7 @@
                                     <workingDirectory>${project.base.directory}</workingDirectory>
                                     <arguments>
                                         <argument>package</argument>
-                                        <argument>-Pstart-karaf</argument>
+                                        <argument>-Pbuild,run-karaf</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
@@ -186,7 +189,7 @@
             </build>
         </profile>
         <profile>
-            <id>start-karaf</id>
+            <id>build</id>
             <build>
                 <plugins>
                     <plugin>
@@ -240,6 +243,13 @@
                             </execution>
                         </executions>
                     </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>run-karaf</id>
+            <build>
+                <plugins>
                     <plugin>
                         <groupId>org.apache.karaf.tooling</groupId>
                         <artifactId>karaf-maven-plugin</artifactId>

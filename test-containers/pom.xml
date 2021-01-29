@@ -275,9 +275,13 @@
             As a result one container will still be active when ITs from another 
             module starts. That will not allow another OSGi container starts. 
             -->
-            <id>felix-jetty</id>
+            <id>non-bnd-tools</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <modules>
                 <module>felix-jetty</module>
+                <module>karaf</module>
             </modules>
         </profile>
         <profile>

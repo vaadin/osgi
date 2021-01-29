@@ -280,7 +280,7 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
-                <module>felix-jetty</module>
+                <!--  module>felix-jetty</module-->
                 <module>karaf</module>
             </modules>
         </profile>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="flow-osgi">
+   
+    <feature name="flow-osgi" description="Flow OSGi" version="${project.version}">
+        <details>Flow OSGi feature</details>
+    </feature>
+</features>

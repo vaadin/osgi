@@ -11,7 +11,7 @@
     <artifactId>flow-osgi</artifactId>
     <name>Flow OSGi Support</name>
     <packaging>jar</packaging>
-    
+
     <licenses>
         <license>
             <name>Commercial Vaadin Developer License version 4.0</name>
@@ -29,8 +29,9 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-server</artifactId>
@@ -56,13 +57,13 @@
             <artifactId>httpclient-osgi</artifactId>
             <version>4.5.13</version>
         </dependency>
-        
+
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore-osgi</artifactId>
             <version>4.4.4</version>
         </dependency>
-        
+
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>license-checker</artifactId>
@@ -71,7 +72,7 @@
     </dependencies>
 
     <build>
-         <resources>
+        <resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
@@ -92,6 +93,26 @@
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
                     </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>generate-features-file</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>features-generate-descriptor</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <includeProjectArtifact>false</includeProjectArtifact>
+                    <includeTransitiveDependency>false</includeTransitiveDependency>
+                    <excludedArtifactIds>httpclient-osgi,httpcore-osgi</excludedArtifactIds>
                 </configuration>
             </plugin>
 

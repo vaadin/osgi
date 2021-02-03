@@ -39,7 +39,7 @@ public class SmokeIT extends ChromeBrowserTest {
         // separate JVM and no one waits for its readiness.
         // As a result IT tests starts immediately and this workaround is used
         // to wait when HTTP server starts to handle HTTP requests.
-        waitRootUrl(60);
+        waitRootUrl(180);
 
         super.checkIfServerAvailable();
 

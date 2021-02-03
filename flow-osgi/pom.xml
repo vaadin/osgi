@@ -112,7 +112,10 @@
                 <configuration>
                     <includeProjectArtifact>false</includeProjectArtifact>
                     <includeTransitiveDependency>false</includeTransitiveDependency>
-                    <excludedArtifactIds>httpclient-osgi,httpcore-osgi</excludedArtifactIds>
+                    <excludedArtifactIds>
+                        <excludedArtifactId>httpclient-osgi</excludedArtifactId>
+                        <excludedArtifactId>httpcore-osgi</excludedArtifactId>
+                    </excludedArtifactIds>
                 </configuration>
             </plugin>
 

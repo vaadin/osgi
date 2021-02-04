@@ -25,29 +25,9 @@
         </pluginManagement>
     </build>
 
-    <profiles>
-        <profile>
-            <id>build</id>
-            <activation>
-                <property>
-                    <name>skipTests</name>
-                </property>
-            </activation>
-            <modules>
-                <module>karaf-test-project</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>runIts</id>
-            <activation>
-                <property>
-                    <name>!skipTests</name>
-                </property>
-            </activation>
-            <modules>
-                <module>karaf-run</module>
-            </modules>
-        </profile>
-    </profiles>
+    <modules>
+        <module>karaf-test-project</module>
+        <module>karaf-run</module>
+    </modules>
 </project>
 

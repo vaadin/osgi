@@ -59,11 +59,9 @@ import com.vaadin.pro.licensechecker.LicenseChecker;
         HttpSessionListener.class, ServletContextListener.class,
         OSGiVaadinInitialization.class }, scope = ServiceScope.SINGLETON, property = {
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER + "=true",
-                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT + "=(&("
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT + "=("
                         + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME
-                        + "=*) (!("
-                        + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME
-                        + "=vaadinResourcesContext*)))" })
+                        + "=*)" })
 public class OSGiVaadinInitialization implements VaadinServiceInitListener,
         HttpSessionListener, ServletContextListener {
 

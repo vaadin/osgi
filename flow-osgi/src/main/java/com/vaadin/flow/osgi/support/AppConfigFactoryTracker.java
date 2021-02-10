@@ -12,20 +12,28 @@ package com.vaadin.flow.osgi.support;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Dictionary;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Set;
+import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.context.ServletContextHelper;
@@ -63,17 +71,43 @@ class AppConfigFactoryTracker extends
 
     private final ServletContainerInitializerClasses initializerClasses;
 
-    private static final class ResourcesContextHelper
-            extends ServletContextHelper {
+    /**
+     * 
+     * HTTP Whiteboard Resource service doesn't work reliably neither in Felix
+     * Jetty nor in PAX web. So resources are registered via this dedicated
+     * servlet which uses the existing {@link ServletContextHelper} service
+     * registered for the same context path as the Vaadin servlet.
+     *
+     */
+    private static class ResourceServlet extends HttpServlet {
 
-        private ResourcesContextHelper(Bundle bundle) {
-            super(bundle);
+        private final Bundle bundle;
+
+        private final String path;
+
+        private ResourceServlet(Bundle bundle, String path) {
+            this.bundle = bundle;
+            this.path = path;
         }
 
-    }
+        @Override
+        protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+                throws ServletException, IOException {
 
-    public static class ResourceService {
-
+            String pathInfo = req.getPathInfo();
+            if (pathInfo == null) {
+                resp.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
+                return;
+            }
+            URL resource = bundle.getResource(path + pathInfo);
+            if (resource == null) {
+                resp.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
+                return;
+            }
+            try (InputStream stream = resource.openStream()) {
+                IOUtils.copy(stream, resp.getOutputStream());
+            }
+        }
     }
 
     private abstract static class ResourceBundleTracker
@@ -83,9 +117,9 @@ class AppConfigFactoryTracker extends
 
         private final String contextPath;
 
-        private ServiceRegistration<ServletContextHelper> contextHelperRegistration;
+        private ServiceRegistration<Servlet> resourceRegistration;
 
-        private ServiceRegistration<ResourceService> resourceRegistration;
+        private ServiceListener contextHelperListener;
 
         private ResourceBundleTracker(Bundle webAppBundle, String symbolicName,
                 String contextPath) {
@@ -101,7 +135,7 @@ class AppConfigFactoryTracker extends
             Bundle result = super.addingBundle(bundle, event);
             if ((bundle.getState() & Bundle.ACTIVE) != 0
                     && symbolicName.equals(bundle.getSymbolicName())) {
-                registerResource(bundle, registerContextHelper(bundle));
+                registerResource(bundle);
             }
             return result;
         }
@@ -110,16 +144,8 @@ class AppConfigFactoryTracker extends
         public void bundleChanged(BundleEvent event) {
             if ((event.getType() & BundleEvent.STOPPED) != 0) {
                 stop();
-                if (contextHelperRegistration != null) {
-                    contextHelperRegistration.unregister();
-                }
-                if (resourceRegistration != null) {
-                    resourceRegistration.unregister();
-                }
             }
         }
-
-        protected abstract String getContextPrefix();
 
         protected abstract String getResourceURI();
 
@@ -128,111 +154,129 @@ class AppConfigFactoryTracker extends
         private void stop() {
             close();
             context.removeBundleListener(this);
+            if (contextHelperListener != null && resourceRegistration != null) {
+                resourceRegistration.getReference().getBundle()
+                        .getBundleContext()
+                        .removeServiceListener(contextHelperListener);
+            }
+            if (resourceRegistration != null) {
+                resourceRegistration.unregister();
+            }
         }
 
-        private void registerResource(Bundle bundle, String contextName) {
+        private void registerResource(Bundle bundle) {
             Dictionary<String, String> properties = new Hashtable<String, String>();
             properties.put(
-                    HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN,
+                    HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,
+                    Boolean.TRUE.toString());
+            properties.put(
+                    HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN,
                     getResourceURI());
-            properties.put(
-                    HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX,
-                    getResourcePath());
-            properties.put(
-                    HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
-                    "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME
-                            + "=" + contextName + ")");
+            String contextName = getContextName();
+            if (contextName != null) {
+                properties.put(
+                        HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+                        "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME
+                                + "=" + getContextName() + ")");
+            }
             resourceRegistration = bundle.getBundleContext().registerService(
-                    ResourceService.class, new ResourceService(), properties);
+                    Servlet.class,
+                    new ResourceServlet(bundle, getResourcePath()), properties);
         }
 
-        private String registerContextHelper(Bundle bundle) {
-            String contextName = generateUniqueContextName(contextPath);
-
-            Dictionary<String, String> contextProps = new Hashtable<String, String>();
-            // set unique name for the context
-            contextProps.put(
-                    HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME,
-                    contextName);
-            contextProps.put(
-                    HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH,
-                    contextPath);
-            contextHelperRegistration = bundle.getBundleContext()
-                    .registerService(ServletContextHelper.class,
-                            new ResourcesContextHelper(bundle), contextProps);
-            return contextName;
-        }
-
-        private String generateUniqueContextName(String contextPath) {
-            String contextName = sanitizeContextName(contextPath);
-            String name;
-            if (contextName.isEmpty()) {
-                name = getContextPrefix();
-            } else {
-                name = getContextPrefix() + "." + contextName;
-            }
-            Set<String> contextNames = getAvailableContextNames();
-            if (contextNames.contains(name)) {
-                int i = 1;
-                String result;
-                do {
-                    result = name + i;
-                    i++;
-                } while (contextNames.contains(result));
-                return result;
-            } else {
-                return name;
-            }
-        }
-
-        /**
-         * Uses {@code suggestedName} as a basis to produce a context name with
-         * "osgi.http.whiteboard.context.name" property via filtering via
-         * "osgi.http.whiteboard.context.select".
-         * 
-         * @param suggestedName
-         *            the basis to produce a context name
-         * @return a name which can be used as a context name
-         */
-        private String sanitizeContextName(String suggestedName) {
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < suggestedName.length(); i++) {
-                char nextChar = suggestedName.charAt(i);
-                if (Character.isLetterOrDigit(nextChar) || nextChar == '.'
-                        || nextChar == '_' || nextChar == '-') {
-                    builder.append(nextChar);
-                }
-            }
-            return builder.toString();
-        }
-
-        private Set<String> getAvailableContextNames() {
-            BundleContext bundleContext = FrameworkUtil
-                    .getBundle(OSGiVaadinInitialization.class)
-                    .getBundleContext();
+        private String getContextName() {
             try {
-                ServiceReference<?>[] references = bundleContext
+                ServiceReference<?>[] references = context
                         .getAllServiceReferences(
                                 ServletContextHelper.class.getName(), null);
                 if (references == null) {
-                    return Collections.emptySet();
+                    reportEmptyContextHelpers();
+                    return null;
                 }
-                Set<String> contextNames = new HashSet<>();
-                for (ServiceReference<?> reference : references) {
-                    Object nextName = reference.getProperty(
-                            HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
-                    if (nextName != null) {
-                        contextNames.add(nextName.toString());
+                Map<Long, ServiceReference<?>> matchedReferences = filterReferencesByContextPath(
+                        references);
+                if (matchedReferences.isEmpty()) {
+                    reportEmptyContextHelpers();
+                    return null;
+                }
+                if (matchedReferences.size() == 1) {
+                    return getContextNameProperty(
+                            matchedReferences.values().iterator().next());
+                } else {
+                    ServiceReference<?> reference = matchedReferences
+                            .get(context.getBundle().getBundleId());
+                    if (reference == null) {
+                        reference = matchedReferences.values().iterator()
+                                .next();
+                        trackContextHelperReferences(reference);
                     }
+                    return getContextNameProperty(reference);
                 }
-                return contextNames;
             } catch (InvalidSyntaxException exception) {
                 LoggerFactory.getLogger(OSGiVaadinInitialization.class).error(
-                        "Couldn't get all {} services to generate unique context name",
+                        "Couldn't get all {} services to find the context name",
                         ServletContextHelper.class);
-                return Collections.emptySet();
+                return null;
             }
         }
+
+        private void reportEmptyContextHelpers() {
+            if (!"/".equals(contextPath)) {
+                LoggerFactory.getLogger(ResourceBundleTracker.class).error(
+                        "No {} services found matched context path '{}'",
+                        ServletContextHelper.class.getSimpleName(),
+                        contextPath);
+            }
+        }
+
+        private void trackContextHelperReferences(
+                ServiceReference<?> reference) {
+            LoggerFactory.getLogger(ResourceBundleTracker.class).debug(
+                    "Found several {} services matched context path '{}'. "
+                            + "The first one is used to register a resource and it's tracked for changes.",
+                    ServletContextHelper.class.getSimpleName(), contextPath);
+            contextHelperListener = event -> {
+                if (reference.equals(event.getServiceReference())
+                        && event.getType() != ServiceEvent.REGISTERED) {
+                    if (contextHelperListener != null) {
+                        reference.getBundle().getBundleContext()
+                                .removeServiceListener(contextHelperListener);
+                        contextHelperListener = null;
+                    }
+                    if (resourceRegistration != null) {
+                        Bundle bundle = resourceRegistration.getReference()
+                                .getBundle();
+                        resourceRegistration.unregister();
+                        registerResource(bundle);
+                    }
+                }
+            };
+            reference.getBundle().getBundleContext()
+                    .addServiceListener(contextHelperListener);
+        }
+
+        private String getContextNameProperty(ServiceReference<?> reference) {
+            return reference.getProperty(
+                    HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME)
+                    .toString();
+        }
+
+        private Map<Long, ServiceReference<?>> filterReferencesByContextPath(
+                ServiceReference<?>[] references) {
+            Map<Long, ServiceReference<?>> matchedReferences = new HashMap<>();
+            for (ServiceReference<?> reference : references) {
+                if (reference.getUsingBundles().length > 0) {
+                    Object path = reference.getProperty(
+                            HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH);
+                    if (contextPath.equals(path)) {
+                        matchedReferences.put(
+                                reference.getBundle().getBundleId(), reference);
+                    }
+                }
+            }
+            return matchedReferences;
+        }
+
     }
 
     private static class ClientResourceBundleTracker
@@ -241,11 +285,6 @@ class AppConfigFactoryTracker extends
         private ClientResourceBundleTracker(Bundle webAppBundle,
                 String contextPath) {
             super(webAppBundle, "com.vaadin.flow.client", contextPath);
-        }
-
-        @Override
-        protected String getContextPrefix() {
-            return "vaadinClientResource";
         }
 
         @Override
@@ -266,11 +305,6 @@ class AppConfigFactoryTracker extends
         private PushResourceBundleTracker(Bundle webAppBundle,
                 String contextPath) {
             super(webAppBundle, "com.vaadin.flow.push", contextPath);
-        }
-
-        @Override
-        protected String getContextPrefix() {
-            return "vaadinPushResource";
         }
 
         @Override

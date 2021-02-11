@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collection;
@@ -25,17 +26,22 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.launch.Framework;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.BundleTracker;
@@ -121,6 +127,8 @@ class AppConfigFactoryTracker extends
 
         private ServiceListener contextHelperListener;
 
+        private WeakReference<Bundle> resourceBundle;
+
         private ResourceBundleTracker(Bundle webAppBundle, String symbolicName,
                 String contextPath) {
             super(webAppBundle.getBundleContext(),
@@ -135,6 +143,7 @@ class AppConfigFactoryTracker extends
             Bundle result = super.addingBundle(bundle, event);
             if ((bundle.getState() & Bundle.ACTIVE) != 0
                     && symbolicName.equals(bundle.getSymbolicName())) {
+                resourceBundle = new WeakReference<>(bundle);
                 registerResource(bundle);
             }
             return result;
@@ -154,21 +163,23 @@ class AppConfigFactoryTracker extends
         private void stop() {
             close();
             context.removeBundleListener(this);
-            if (contextHelperListener != null && resourceRegistration != null) {
-                resourceRegistration.getReference().getBundle()
-                        .getBundleContext()
+            Bundle bundle = resourceBundle.get();
+            if (bundle == null) {
+                return;
+            }
+            if (contextHelperListener != null) {
+                bundle.getBundleContext()
                         .removeServiceListener(contextHelperListener);
             }
-            if (resourceRegistration != null) {
+
+            if (resourceRegistration != null
+                    && bundle.getRegisteredServices().length > 0) {
                 resourceRegistration.unregister();
             }
         }
 
         private void registerResource(Bundle bundle) {
             Dictionary<String, String> properties = new Hashtable<String, String>();
-            properties.put(
-                    HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,
-                    Boolean.TRUE.toString());
             properties.put(
                     HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN,
                     getResourceURI());
@@ -177,7 +188,7 @@ class AppConfigFactoryTracker extends
                 properties.put(
                         HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
                         "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME
-                                + "=" + getContextName() + ")");
+                                + "=" + contextName + ")");
             }
             resourceRegistration = bundle.getBundleContext().registerService(
                     Servlet.class,
@@ -185,6 +196,10 @@ class AppConfigFactoryTracker extends
         }
 
         private String getContextName() {
+            if ("/".equals(contextPath)) {
+                // default context path doesn't require any ServletContextHelper
+                return null;
+            }
             try {
                 ServiceReference<?>[] references = context
                         .getAllServiceReferences(
@@ -391,6 +406,16 @@ class AppConfigFactoryTracker extends
         return factory;
     }
 
+    private boolean isFrameworkStarted() {
+        Optional<Bundle> framework = Stream.of(context.getBundles()).filter(
+                bundle -> Framework.class.isAssignableFrom(bundle.getClass()))
+                .findFirst();
+        if (framework.isPresent()) {
+            return (Bundle.ACTIVE & framework.get().getState()) > 0;
+        }
+        return false;
+    }
+
     @Override
     public void bundleChanged(BundleEvent event) {
         if ((event.getType() & BundleEvent.STOPPED) != 0) {
@@ -447,13 +472,27 @@ class AppConfigFactoryTracker extends
             return;
         }
 
-        registerResoures(servletContext);
+        if (isFrameworkStarted()) {
+            registerResoures(servletContext);
+        } else {
+            FrameworkListener listener = new FrameworkListener() {
+
+                @Override
+                public void frameworkEvent(FrameworkEvent event) {
+                    if (isFrameworkStarted()) {
+                        registerResoures(servletContext);
+                        context.removeFrameworkListener(this);
+                    }
+                }
+            };
+            context.addFrameworkListener(listener);
+        }
 
         OSGiVaadinInitialization
                 .checkLicense(ApplicationConfiguration.get(servletContext));
 
         Collection<Servlet> servlets = OSGiVaadinInitialization.lookupAll(
-                FrameworkUtil.getBundle(OSGiVaadinInitialization.class),
+                FrameworkUtil.getBundle(AppConfigFactoryTracker.class),
                 Servlet.class);
         for (Servlet servlet : servlets) {
             if (isUninitializedServlet(servlet)) {

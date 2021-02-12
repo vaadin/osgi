@@ -3,6 +3,6 @@ Bundle-Name: Karf smoke test project
 Bundle-Version: ${osgi.bundle.version}
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-License: http://www.apache.org/licenses/LICENSE-2.0
-Import-Package: *
+Import-Package: org.osgi.service.http.context;version='[1.0,2)', *
 Export-Package: !*
 Vaadin-OSGi-Extender: true

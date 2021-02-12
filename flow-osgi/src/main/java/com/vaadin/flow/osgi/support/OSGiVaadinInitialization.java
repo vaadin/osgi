@@ -29,13 +29,10 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleReference;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ServiceScope;
-import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.LoggerFactory;
 
@@ -62,11 +59,9 @@ import com.vaadin.pro.licensechecker.LicenseChecker;
         HttpSessionListener.class, ServletContextListener.class,
         OSGiVaadinInitialization.class }, scope = ServiceScope.SINGLETON, property = {
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER + "=true",
-                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT + "=(&("
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT + "=("
                         + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME
-                        + "=*) (!("
-                        + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME
-                        + "=vaadinResourcesContext*)))" })
+                        + "=*)" })
 public class OSGiVaadinInitialization implements VaadinServiceInitListener,
         HttpSessionListener, ServletContextListener {
 
@@ -80,36 +75,6 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
     private static final String VERSION = readVersion();
 
     private static final class VaadinServletMarker {
-    }
-
-    private static final class ResourcesContextHelper
-            extends ServletContextHelper {
-
-        private ResourcesContextHelper(Bundle bundle) {
-            super(bundle);
-        }
-    }
-
-    public static class ResourceService {
-
-    }
-
-    static class ResourceContextHelperFactory
-            implements ServiceFactory<ServletContextHelper> {
-
-        @Override
-        public ServletContextHelper getService(Bundle bundle,
-                ServiceRegistration<ServletContextHelper> registration) {
-            return new ResourcesContextHelper(bundle);
-        }
-
-        @Override
-        public void ungetService(Bundle bundle,
-                ServiceRegistration<ServletContextHelper> registration,
-                ServletContextHelper service) {
-            // no op
-        }
-
     }
 
     static class IllegalContextState extends Exception {

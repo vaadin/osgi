@@ -60,16 +60,16 @@
                                 <pluginExecution>
                                     <pluginExecutionFilter>
                                         <groupId>
-                                            org.apache.maven.plugins
+                                            org.apache.karaf.tooling
                                         </groupId>
                                         <artifactId>
-                                            maven-antrun-plugin
+                                            karaf-maven-plugin
                                         </artifactId>
                                         <versionRange>
-                                            [1.7,)
+                                            [4.3,)
                                         </versionRange>
                                         <goals>
-                                            <goal>run</goal>
+                                            <goal>features-generate-descriptor</goal>
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
@@ -142,7 +142,18 @@
                     <enableGeneration>true</enableGeneration>
                     <ignoreScopeProvided>true</ignoreScopeProvided>
                     <includeProjectArtifact>true</includeProjectArtifact>
-                    <excludedArtifactIds>httpclient,vaadin__vaadin-mobile-drag-drop,mobile-drag-drop,httpclient-osgi,httpmime,httpclient-cache,fluent-hc,httpcore-osgi,httpcore,httpcore-nio</excludedArtifactIds>
+                    <excludedArtifactIds>
+                        <excludedArtifactId>httpclient</excludedArtifactId>
+                        <excludedArtifactId>vaadin__vaadin-mobile-drag-drop</excludedArtifactId>
+                        <excludedArtifactId>mobile-drag-drop</excludedArtifactId>
+                        <excludedArtifactId>httpclient-osgi</excludedArtifactId>
+                        <excludedArtifactId>httpmime</excludedArtifactId>
+                        <excludedArtifactId>httpclient-cache</excludedArtifactId>
+                        <excludedArtifactId>fluent-hc</excludedArtifactId>
+                        <excludedArtifactId>httpcore-osgi</excludedArtifactId>
+                        <excludedArtifactId>httpcore</excludedArtifactId>
+                        <excludedArtifactId>httpcore-nio</excludedArtifactId>
+                    </excludedArtifactIds>
                 </configuration>
                 <executions>
                     <execution>
@@ -157,36 +168,5 @@
         </plugins>
     </build>
 
-    <profiles>
-        <profile>
-            <id>java11</id>
-            <!-- Java 11 has no built-in "jaxb" and "activation" packages 
-                so they should be provided as dependencies to be able to resolve bundles 
-                which depends on them -->
-            <activation>
-                <jdk>11</jdk>
-            </activation>
-            <properties>
-                <maven.compiler.release>8</maven.compiler.release>
-            </properties>
-            <dependencies>
-                <dependency>
-                    <groupId>javax.xml.bind</groupId>
-                    <artifactId>jaxb-api-osgi</artifactId>
-                    <version>2.2.7</version>
-                </dependency>
-                <dependency>
-                    <groupId>com.sun.xml.bind</groupId>
-                    <artifactId>jaxb-osgi</artifactId>
-                    <version>2.2.7</version>
-                </dependency>
-                <dependency>
-                    <groupId>com.sun.activation</groupId>
-                    <artifactId>javax.activation</artifactId>
-                    <version>1.2.0</version>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
 </project>
 

@@ -9,19 +9,27 @@
  */
 package com.vaadin.flow.osgi.support.servlet;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.osgi.support.OSGiVaadinInitialization;
 import com.vaadin.flow.server.VaadinServlet;
+import com.vaadin.flow.server.VaadinServletContext;
 
 /**
  * The Vaadin servlet to use in OSGi.
@@ -75,4 +83,65 @@ public class OSGiVaadinServlet extends VaadinServlet {
                 bundleContext, getServletContext());
         tracker.open();
     }
+
+    @Override
+    public void destroy() {
+        ServletContext servletContext = getServletContext();
+        Lookup lookup = new VaadinServletContext(servletContext)
+                .getAttribute(Lookup.class);
+        super.destroy();
+        if (lookup == null) {
+            return;
+        }
+
+        BundleContext bundleContext = FrameworkUtil
+                .getBundle(OSGiVaadinServlet.class).getBundleContext();
+        Set<Servlet> servlets = new HashSet<>();
+        try {
+            ServiceReference<?>[] references = bundleContext
+                    .getAllServiceReferences(Servlet.class.getName(), null);
+            for (ServiceReference<?> reference : references) {
+                servlets.addAll(handleDestroy(lookup, reference));
+            }
+        } catch (InvalidSyntaxException e) {
+            // this may not happen because filter parameter is {@code null} so
+            // it may not have invalid syntax
+            assert false;
+        }
+        servlets.remove(this);
+        if (servlets.size() > 0) {
+            return;
+        }
+        ServiceReference<OSGiVaadinInitialization> reference = bundleContext
+                .getServiceReference(OSGiVaadinInitialization.class);
+        if (reference == null) {
+            return;
+        }
+        OSGiVaadinInitialization initialization = bundleContext
+                .getService(reference);
+        initialization
+                .contextDestroyed(new ServletContextEvent(servletContext));
+    }
+
+    private Set<Servlet> handleDestroy(Lookup lookup,
+            ServiceReference<?> reference) {
+        Set<Servlet> servlets = new HashSet<>();
+        Bundle[] usingBundles = reference.getUsingBundles();
+        for (Bundle bundle : usingBundles) {
+            Servlet servlet = (Servlet) bundle.getBundleContext()
+                    .getService(reference);
+            System.out.println("gadfgagdsfdasf " + servlet);
+            if (servlet instanceof OSGiVaadinServlet) {
+                ServletContext servletContext = ((VaadinServlet) servlet)
+                        .getServletContext();
+                Lookup servletLookup = new VaadinServletContext(servletContext)
+                        .getAttribute(Lookup.class);
+                if (servletLookup == lookup) {
+                    servlets.add(servlet);
+                }
+            }
+        }
+        return servlets;
+    }
+
 }

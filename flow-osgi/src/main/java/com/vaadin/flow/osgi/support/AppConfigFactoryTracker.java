@@ -539,7 +539,11 @@ class AppConfigFactoryTracker extends
 
     private void collectVaadinServlets(Set<VaadinServlet> servlets,
             ServiceReference<?> reference) {
-        Stream.of(reference.getUsingBundles())
+        Bundle[] bundles = reference.getUsingBundles();
+        if (bundles == null) {
+            return;
+        }
+        Stream.of(bundles)
                 .map(bundle -> bundle.getBundleContext().getService(reference))
                 .filter(VaadinServlet.class::isInstance)
                 .map(VaadinServlet.class::cast).forEach(servlets::add);

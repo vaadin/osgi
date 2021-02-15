@@ -130,7 +130,6 @@ public class OSGiVaadinServlet extends VaadinServlet {
         for (Bundle bundle : usingBundles) {
             Servlet servlet = (Servlet) bundle.getBundleContext()
                     .getService(reference);
-            System.out.println("gadfgagdsfdasf " + servlet);
             if (servlet instanceof OSGiVaadinServlet) {
                 ServletContext servletContext = ((VaadinServlet) servlet)
                         .getServletContext();

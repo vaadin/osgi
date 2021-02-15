@@ -21,12 +21,17 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
@@ -35,7 +40,6 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -340,8 +344,27 @@ class AppConfigFactoryTracker extends
 
         @Override
         public <T> Collection<T> lookupAll(Class<T> serviceClass) {
-            return OSGiVaadinInitialization.lookupAll(getWebAppBundle(),
-                    serviceClass);
+            Bundle bundle = getWebAppBundle();
+            try {
+                Collection<ServiceReference<T>> references = bundle
+                        .getBundleContext()
+                        .getServiceReferences(serviceClass, null);
+                List<T> services = new ArrayList<>(references.size());
+                for (ServiceReference<T> reference : references) {
+                    T service = bundle.getBundleContext().getService(reference);
+                    if (service != null) {
+                        services.add(service);
+                    }
+                }
+                return services;
+            } catch (InvalidSyntaxException e) {
+                LoggerFactory.getLogger(AppConfigFactoryTracker.class)
+                        .error("Unexpected invalid filter expression", e);
+                assert false : "Implementation error: Unexpected invalid filter exception is "
+                        + "thrown even though the service filter is null. Check the exception and update the impl";
+            }
+
+            return Collections.emptyList();
         }
 
         private Bundle getWebAppBundle() {
@@ -471,16 +494,39 @@ class AppConfigFactoryTracker extends
         OSGiVaadinInitialization
                 .checkLicense(ApplicationConfiguration.get(servletContext));
 
-        Collection<Servlet> servlets = OSGiVaadinInitialization.lookupAll(
-                FrameworkUtil.getBundle(AppConfigFactoryTracker.class),
-                Servlet.class);
-        for (Servlet servlet : servlets) {
-            if (isUninitializedServlet(servlet)) {
-                handleUninitializedServlet(lookup, servlet);
-            }
-        }
+        getRegisteredVaadinServlets().stream()
+                .filter(this::isUninitializedServlet).forEach(
+                        servlet -> handleUninitializedServlet(lookup, servlet));
 
         initializerClasses.addContext(servletContext.getContext());
+    }
+
+    private Collection<VaadinServlet> getRegisteredVaadinServlets() {
+        Set<VaadinServlet> result = new HashSet<>();
+        try {
+            Stream.of(context.getAllServiceReferences(Servlet.class.getName(),
+                    null))
+                    .forEach(reference -> collectVaadinServlets(result,
+                            reference));
+        } catch (InvalidSyntaxException e) {
+            LoggerFactory.getLogger(AppConfigFactoryTracker.class)
+                    .error("Unexpected invalid filter expression", e);
+            assert false : "Implementation error: Unexpected invalid filter exception is "
+                    + "thrown even though the service filter is null. Check the exception and update the impl";
+        }
+        return result;
+    }
+
+    private void collectVaadinServlets(Set<VaadinServlet> servlets,
+            ServiceReference<?> reference) {
+        Bundle[] bundles = reference.getUsingBundles();
+        if (bundles == null) {
+            return;
+        }
+        Stream.of(bundles)
+                .map(bundle -> bundle.getBundleContext().getService(reference))
+                .filter(VaadinServlet.class::isInstance)
+                .map(VaadinServlet.class::cast).forEach(servlets::add);
     }
 
     private void handleUninitializedServlet(Lookup lookup, Servlet servlet) {
@@ -499,13 +545,9 @@ class AppConfigFactoryTracker extends
         }
     }
 
-    private boolean isUninitializedServlet(Object object) {
-        if (object instanceof VaadinServlet) {
-            VaadinServlet vaadinServlet = (VaadinServlet) object;
-            return vaadinServlet.getServletConfig() != null
-                    && vaadinServlet.getService() == null;
-        }
-        return false;
+    private boolean isUninitializedServlet(VaadinServlet servlet) {
+        return servlet.getServletConfig() != null
+                && servlet.getService() == null;
     }
 
     private void registerResoures(VaadinContext context) {

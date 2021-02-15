@@ -294,26 +294,6 @@ class AppConfigFactoryTracker extends
 
     }
 
-    private static class ClientResourceBundleTracker
-            extends ResourceBundleTracker {
-
-        private ClientResourceBundleTracker(Bundle webAppBundle,
-                String contextPath) {
-            super(webAppBundle, "com.vaadin.flow.client", contextPath);
-        }
-
-        @Override
-        protected String getResourceURI() {
-            return "/VAADIN/static/client/*";
-        }
-
-        @Override
-        protected String getResourcePath() {
-            return "/META-INF/resources/VAADIN/static/client";
-        }
-
-    }
-
     private static class PushResourceBundleTracker
             extends ResourceBundleTracker {
 
@@ -536,14 +516,7 @@ class AppConfigFactoryTracker extends
             contextPath = "/";
         }
 
-        registerClientResources(contextPath);
         registerPushResources(contextPath);
-    }
-
-    private void registerClientResources(String contextPath) {
-        ResourceBundleTracker resourceBoundleTracker = new ClientResourceBundleTracker(
-                webAppBundle, contextPath);
-        resourceBoundleTracker.open();
     }
 
     private void registerPushResources(String contextPath) {

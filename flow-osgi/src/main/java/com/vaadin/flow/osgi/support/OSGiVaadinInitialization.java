@@ -19,17 +19,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Properties;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleReference;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ServiceScope;
@@ -196,29 +190,6 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
                     "Unexpected classloader for the web app '" + classloader
                             + "'. It's not possible to get an OSGi bundle from it");
         }
-    }
-
-    static <T> Collection<T> lookupAll(Bundle bundle, Class<T> serviceClass) {
-        try {
-            Collection<ServiceReference<T>> references = bundle
-                    .getBundleContext()
-                    .getServiceReferences(serviceClass, null);
-            List<T> services = new ArrayList<>(references.size());
-            for (ServiceReference<T> reference : references) {
-                T service = bundle.getBundleContext().getService(reference);
-                if (service != null) {
-                    services.add(service);
-                }
-            }
-            return services;
-        } catch (InvalidSyntaxException e) {
-            LoggerFactory.getLogger(OSGiVaadinInitialization.class)
-                    .error("Unexpected invalid filter expression", e);
-            assert false : "Implementation error: Unexpected invalid filter exception is "
-                    + "thrown even though the service filter is null. Check the exception and update the impl";
-        }
-
-        return Collections.emptyList();
     }
 
     static void checkLicense(AbstractConfiguration configuration) {

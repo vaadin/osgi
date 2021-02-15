@@ -15,12 +15,15 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.HandlesTypes;
 
 import java.lang.annotation.Annotation;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,8 +63,40 @@ public final class ServletContainerInitializerClasses {
 
     private final Map<Long, Collection<Class<?>>> cachedClasses = new ConcurrentHashMap<>();
 
-    private final Set<ServletContext> contexts = Collections
+    private final Set<ServletContextReference> contexts = Collections
             .newSetFromMap(new ConcurrentHashMap<>());
+
+    private static class ServletContextReference
+            extends WeakReference<ServletContext> {
+
+        private ServletContextReference(ServletContext context) {
+            super(context);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (!obj.getClass().equals(ServletContextReference.class)) {
+                return false;
+            }
+            return Objects.equals(((ServletContextReference) obj).get(), get());
+        }
+
+        @Override
+        public int hashCode() {
+            ServletContext servletContext = get();
+            if (servletContext == null) {
+                return super.hashCode();
+            }
+            return servletContext.hashCode();
+        }
+
+    }
 
     public ServletContainerInitializerClasses() {
         // The class is a singleton. Avoid instantiation outside of the class.
@@ -107,7 +142,13 @@ public final class ServletContainerInitializerClasses {
             Map<Long, Collection<Class<?>>> extenderClasses) {
         cachedClasses.putAll(extenderClasses);
         List<InvalidApplicationConfigurationException> thrown = new ArrayList<>();
-        for (ServletContext context : contexts) {
+        Iterator<ServletContextReference> iterator = contexts.iterator();
+        while (iterator.hasNext()) {
+            WeakReference<ServletContext> ref = iterator.next();
+            ServletContext context = ref.get();
+            if (context == null) {
+                iterator.remove();
+            }
             try {
                 resetContextInitializers(context);
             } catch (InvalidApplicationConfigurationException exception) {
@@ -147,7 +188,7 @@ public final class ServletContainerInitializerClasses {
      *            the servlet context to run servlet context initializers
      */
     public void addContext(ServletContext servletContext) {
-        contexts.add(servletContext);
+        contexts.add(new ServletContextReference(servletContext));
 
         if (hasInitializers()) {
             resetContextInitializers(servletContext);
@@ -162,7 +203,14 @@ public final class ServletContainerInitializerClasses {
      *            the servlet context from tracking contexts
      */
     public void removeContext(ServletContext servletContext) {
-        contexts.remove(servletContext);
+        contexts.remove(new ServletContextReference(servletContext));
+    }
+
+    private void resetContextInitializers(ServletContextReference reference) {
+        ServletContext context = reference.get();
+        if (context != null) {
+            resetContextInitializers(context);
+        }
     }
 
     private void resetContextInitializers(ServletContext context) {

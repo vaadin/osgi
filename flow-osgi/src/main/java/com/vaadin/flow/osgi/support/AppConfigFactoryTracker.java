@@ -72,7 +72,7 @@ import com.vaadin.flow.server.startup.ApplicationConfigurationFactory;
  *
  */
 class AppConfigFactoryTracker extends
-        ServiceTracker<ApplicationConfigurationFactory, ApplicationConfigurationFactory>
+        ServiceTracker<ServletInitializationRequirements, ServletInitializationRequirements>
         implements BundleListener {
 
     private final Bundle webAppBundle;
@@ -387,7 +387,7 @@ class AppConfigFactoryTracker extends
     AppConfigFactoryTracker(Bundle webAppBundle, VaadinServletContext context,
             ServletContainerInitializerClasses initializerClasses) {
         super(webAppBundle.getBundleContext(),
-                ApplicationConfigurationFactory.class, null);
+                ServletInitializationRequirements.class, null);
         this.webAppBundle = webAppBundle;
         servletContext = context;
         this.initializerClasses = initializerClasses;
@@ -395,9 +395,9 @@ class AppConfigFactoryTracker extends
     }
 
     @Override
-    public ApplicationConfigurationFactory addingService(
-            ServiceReference<ApplicationConfigurationFactory> reference) {
-        ApplicationConfigurationFactory factory = super.addingService(
+    public ServletInitializationRequirements addingService(
+            ServiceReference<ServletInitializationRequirements> reference) {
+        ServletInitializationRequirements requirements = super.addingService(
                 reference);
         AppConfigFactoryTracker tracker = servletContext
                 .getAttribute(AppConfigFactoryTracker.class);
@@ -406,7 +406,7 @@ class AppConfigFactoryTracker extends
             servletContext.removeAttribute(AppConfigFactoryTracker.class);
         }
         initializeLookup();
-        return factory;
+        return requirements;
     }
 
     private boolean isFrameworkStarted() {

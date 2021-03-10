@@ -147,11 +147,11 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
         VaadinServletContext servletContext = new VaadinServletContext(
                 event.getServletContext());
 
-        AppConfigFactoryTracker tracker = servletContext
-                .getAttribute(AppConfigFactoryTracker.class);
+        ServletInitRequirementsTracker tracker = servletContext
+                .getAttribute(ServletInitRequirementsTracker.class);
         if (tracker != null) {
             tracker.close();
-            servletContext.removeAttribute(AppConfigFactoryTracker.class);
+            servletContext.removeAttribute(ServletInitRequirementsTracker.class);
         }
     }
 
@@ -160,7 +160,7 @@ public class OSGiVaadinInitialization implements VaadinServiceInitListener,
 
         VaadinServletContext servletContext = (VaadinServletContext) context;
         try {
-            AppConfigFactoryTracker tracker = new AppConfigFactoryTracker(
+            ServletInitRequirementsTracker tracker = new ServletInitRequirementsTracker(
                     findBundle(servletContext), servletContext,
                     initializerClasses);
             servletContext.setAttribute(tracker);

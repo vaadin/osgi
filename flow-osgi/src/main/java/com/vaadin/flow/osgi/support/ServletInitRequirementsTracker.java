@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.internal.ApplicationClassLoaderAccess;
 import com.vaadin.flow.internal.VaadinContextInitializer;
+import com.vaadin.flow.server.HandlerHelper;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinServlet;
 import com.vaadin.flow.server.VaadinServletContext;
@@ -71,7 +72,7 @@ import com.vaadin.flow.server.startup.ApplicationConfigurationFactory;
  * @since
  *
  */
-class AppConfigFactoryTracker extends
+class ServletInitRequirementsTracker extends
         ServiceTracker<ServletInitializationRequirements, ServletInitializationRequirements>
         implements BundleListener {
 
@@ -105,8 +106,13 @@ class AppConfigFactoryTracker extends
                 throws ServletException, IOException {
 
             String pathInfo = req.getPathInfo();
+
             if (pathInfo == null) {
                 resp.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
+                return;
+            }
+            if (HandlerHelper.isPathUnsafe(pathInfo)) {
+                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
             URL resource = bundle.getResource(path + pathInfo);
@@ -358,7 +364,7 @@ class AppConfigFactoryTracker extends
                 }
                 return services;
             } catch (InvalidSyntaxException e) {
-                LoggerFactory.getLogger(AppConfigFactoryTracker.class)
+                LoggerFactory.getLogger(ServletInitRequirementsTracker.class)
                         .error("Unexpected invalid filter expression", e);
                 assert false : "Implementation error: Unexpected invalid filter exception is "
                         + "thrown even though the service filter is null. Check the exception and update the impl";
@@ -384,7 +390,8 @@ class AppConfigFactoryTracker extends
      * @param initializerClasses
      *            {@link ServletContainerInitializerClasses} instance
      */
-    AppConfigFactoryTracker(Bundle webAppBundle, VaadinServletContext context,
+    ServletInitRequirementsTracker(Bundle webAppBundle,
+            VaadinServletContext context,
             ServletContainerInitializerClasses initializerClasses) {
         super(webAppBundle.getBundleContext(),
                 ServletInitializationRequirements.class, null);
@@ -399,11 +406,12 @@ class AppConfigFactoryTracker extends
             ServiceReference<ServletInitializationRequirements> reference) {
         ServletInitializationRequirements requirements = super.addingService(
                 reference);
-        AppConfigFactoryTracker tracker = servletContext
-                .getAttribute(AppConfigFactoryTracker.class);
+        ServletInitRequirementsTracker tracker = servletContext
+                .getAttribute(ServletInitRequirementsTracker.class);
         if (tracker != null) {
             stop();
-            servletContext.removeAttribute(AppConfigFactoryTracker.class);
+            servletContext
+                    .removeAttribute(ServletInitRequirementsTracker.class);
         }
         initializeLookup();
         return requirements;
@@ -509,7 +517,7 @@ class AppConfigFactoryTracker extends
                     .forEach(reference -> collectVaadinServlets(result,
                             reference));
         } catch (InvalidSyntaxException e) {
-            LoggerFactory.getLogger(AppConfigFactoryTracker.class)
+            LoggerFactory.getLogger(ServletInitRequirementsTracker.class)
                     .error("Unexpected invalid filter expression", e);
             assert false : "Implementation error: Unexpected invalid filter exception is "
                     + "thrown even though the service filter is null. Check the exception and update the impl";

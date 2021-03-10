@@ -17,9 +17,12 @@ import org.osgi.service.component.annotations.ServiceScope;
 import com.vaadin.flow.server.StaticFileHandler;
 import com.vaadin.flow.server.StaticFileHandlerFactory;
 import com.vaadin.flow.server.StaticFileServer;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletService;
 
 /**
+ * OSGi {@link StaticFileHandlerFactory} service implementation.
+ * 
  * @author Vaadin Ltd
  * @since
  *
@@ -41,8 +44,11 @@ public class OSGiStaticFileHandlerFactory implements StaticFileHandlerFactory {
     }
 
     @Override
-    public StaticFileHandler createHandler(VaadinServletService service) {
-        return new OSGiStaticFileHandler(service);
+    public StaticFileHandler createHandler(VaadinService service) {
+        if (service instanceof VaadinServletService) {
+            return new OSGiStaticFileHandler((VaadinServletService) service);
+        }
+        return null;
     }
 
 }

@@ -27,7 +27,7 @@ import com.vaadin.flow.server.startup.ApplicationConfigurationFactory;
  *
  */
 @Component(scope = ServiceScope.BUNDLE, service = ServletInitializationRequirements.class)
-class ServletInitializationRequirements {
+public class ServletInitializationRequirements {
 
     @Reference
     private ApplicationConfigurationFactory configurationFactory;

@@ -100,6 +100,8 @@ public class OSGiVaadinServlet extends VaadinServlet {
         try {
             ServiceReference<?>[] references = bundleContext
                     .getAllServiceReferences(Servlet.class.getName(), null);
+            references = references == null ? new ServiceReference<?>[0]
+                    : references;
             for (ServiceReference<?> reference : references) {
                 servlets.addAll(handleDestroy(lookup, reference));
             }
@@ -127,6 +129,7 @@ public class OSGiVaadinServlet extends VaadinServlet {
             ServiceReference<?> reference) {
         Set<Servlet> servlets = new HashSet<>();
         Bundle[] usingBundles = reference.getUsingBundles();
+        usingBundles = usingBundles == null ? new Bundle[0] : usingBundles;
         for (Bundle bundle : usingBundles) {
             Servlet servlet = (Servlet) bundle.getBundleContext()
                     .getService(reference);

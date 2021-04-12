@@ -161,7 +161,9 @@ class ServletInitRequirementsTracker extends
 
         @Override
         public void bundleChanged(BundleEvent event) {
-            if ((event.getType() & BundleEvent.STOPPED) != 0) {
+            if ((event.getType() & BundleEvent.STOPPED) != 0
+                    && event.getBundle().getBundleId() == context.getBundle()
+                            .getBundleId()) {
                 stop();
             }
         }

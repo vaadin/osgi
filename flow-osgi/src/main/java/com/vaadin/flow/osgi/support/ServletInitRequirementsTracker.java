@@ -292,7 +292,8 @@ class ServletInitRequirementsTracker extends
                 ServiceReference<?>[] references) {
             Map<Long, ServiceReference<?>> matchedReferences = new HashMap<>();
             for (ServiceReference<?> reference : references) {
-                if (reference.getUsingBundles().length > 0) {
+                Bundle[] usingBundles = reference.getUsingBundles();
+                if (usingBundles != null && usingBundles.length > 0) {
                     Object path = reference.getProperty(
                             HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH);
                     if (contextPath.equals(path)) {

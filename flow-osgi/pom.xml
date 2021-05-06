@@ -19,6 +19,11 @@
             <distribution>manual</distribution>
         </license>
     </licenses>
+    
+    <properties>
+        <flow.osgi.dependency.versions>[7.0,9)</flow.osgi.dependency.versions>
+        <flow.osgi.manifest.versions>${flow.osgi.dependency.versions}</flow.osgi.manifest.versions>
+    </properties>
 
 
     <dependencies>

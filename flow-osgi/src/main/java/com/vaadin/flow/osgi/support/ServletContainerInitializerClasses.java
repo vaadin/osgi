@@ -44,7 +44,6 @@ import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.router.HasErrorParameter;
 import com.vaadin.flow.server.InvalidApplicationConfigurationException;
 import com.vaadin.flow.server.startup.ClassLoaderAwareServletContainerInitializer;
-import com.vaadin.flow.server.startup.DevModeInitializer;
 import com.vaadin.flow.server.startup.LookupServletContainerInitializer;
 
 /**
@@ -221,9 +220,11 @@ public final class ServletContainerInitializerClasses {
          * 
          * Lookup is set immediately in the context, so no need to initialize it
          */
-        initializerClasses.get().stream().filter(
-                clazz -> !clazz.equals(DevModeInitializer.class) && !clazz
-                        .equals(LookupServletContainerInitializer.class))
+        initializerClasses.get().stream().filter(clazz -> !clazz.getName()
+                .equals("com.vaadin.base.devserver.startup.DevModeInitializer")
+                && !clazz.getName()
+                .equals("com.vaadin.flow.server.startup.DevModeInitializer")
+                && !clazz.equals(LookupServletContainerInitializer.class))
                 .map(ReflectTools::createInstance)
                 .forEach(initializer -> handleTypes(initializer, context));
     }

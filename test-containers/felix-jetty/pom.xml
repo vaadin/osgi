@@ -49,6 +49,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr</artifactId>
             <version>2.1.10</version>
@@ -142,6 +148,7 @@
             <scope>provided</scope>
         </dependency>
 
+
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components-testbench</artifactId>
@@ -219,7 +226,7 @@
                             <includeScope>compile</includeScope>
                             <outputDirectory>${project.build.directory}/${felix.home}/bundle</outputDirectory>
                             <overWriteIfNewer>true</overWriteIfNewer>
-                            <excludeGroupIds> com.google.code.findbugs,
+                            <excludeGroupIds> 
                                 org.seleniumhq.selenium, javax.servlet, com.github.jknack, com.github.fge, com.github.java-json-tools, io.swagger</excludeGroupIds>
                             <excludeArtifactIds>osgi.core, slf4j-ext</excludeArtifactIds>
                         </configuration>

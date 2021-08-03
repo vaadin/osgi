@@ -30,6 +30,12 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- explicitly include transitice dependency of JSON 1.4 to be able to activate the bundle -->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+        </dependency>
 
         <!-- Added to provide logging output as Flow uses -->
         <!-- the unbound SLF4J no-operation (NOP) logger implementation -->

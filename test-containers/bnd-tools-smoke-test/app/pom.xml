@@ -14,7 +14,8 @@
     </parent>
 
     <properties>
-        <bnd.version>5.2.0</bnd.version>
+        <bnd.version>6.1.0</bnd.version>
+        <path.to.java></path.to.java>
     </properties>
 
     <dependencies>
@@ -268,7 +269,7 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <executable>java</executable>
+                            <executable>${path.to.java}java</executable>
                             <async>true</async>
                             <asyncDestroyOnShutdown>true</asyncDestroyOnShutdown>
                             <workingDirectory>${project.build.directory}</workingDirectory>

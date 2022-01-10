@@ -27,7 +27,7 @@
         <!-- to be disabled via system property in CI until they got fixed-->
         <exclude.windows.failed.it.tests></exclude.windows.failed.it.tests>
 
-        <driver.binary.downloader.maven.plugin.version>1.0.17</driver.binary.downloader.maven.plugin.version>
+        <driver.binary.downloader.maven.plugin.version>1.0.18</driver.binary.downloader.maven.plugin.version>
     </properties>
 
     <dependencies>

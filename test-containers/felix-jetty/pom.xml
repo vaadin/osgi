@@ -258,7 +258,7 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <executable>java</executable>
+                            <executable>${path.to.java}/java</executable>
                             <async>true</async>
                             <asyncDestroyOnShutdown>true</asyncDestroyOnShutdown>
                             <workingDirectory>${project.build.directory}/${felix.home}</workingDirectory>
@@ -349,4 +349,3 @@
     </profiles>
 
 </project>
-

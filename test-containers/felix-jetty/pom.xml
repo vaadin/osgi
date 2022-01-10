@@ -19,6 +19,7 @@
         <felix.home>felix-framework-${felix.version}</felix.home>
         <jetty.version>9.4.11.v20180605</jetty.version>
         <test.excludegroup>com.vaadin.flow.testcategory.IgnoreOSGi</test.excludegroup>
+        <path.to.java></path.to.java>
     </properties>
 
     <dependencies>
@@ -258,7 +259,7 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <executable>${path.to.java}/java</executable>
+                            <executable>${path.to.java}java</executable>
                             <async>true</async>
                             <asyncDestroyOnShutdown>true</asyncDestroyOnShutdown>
                             <workingDirectory>${project.build.directory}/${felix.home}</workingDirectory>

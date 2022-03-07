@@ -11,6 +11,8 @@ package com.vaadin.flow.osgi.support;
 
 import java.net.URL;
 
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
@@ -18,6 +20,7 @@ import com.vaadin.flow.server.StaticFileHandler;
 import com.vaadin.flow.server.StaticFileHandlerFactory;
 import com.vaadin.flow.server.StaticFileServer;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.shared.ApplicationConstants;
 
 /**
  * OSGi {@link StaticFileHandlerFactory} service implementation.
@@ -37,6 +40,24 @@ public class OSGiStaticFileHandlerFactory implements StaticFileHandlerFactory {
 
         @Override
         protected URL getStaticResource(String path) {
+            String relativePath = path.replaceFirst("^/", "");
+            if (ApplicationConstants.VAADIN_PUSH_JS.equals(relativePath)
+                    || ApplicationConstants.VAADIN_PUSH_DEBUG_JS
+                            .equals(relativePath)) {
+                return getPushResource(relativePath);
+            }
+            return null;
+        }
+
+        private URL getPushResource(String path) {
+            Bundle[] bundles = FrameworkUtil
+                    .getBundle(OSGiStaticFileHandlerFactory.class)
+                    .getBundleContext().getBundles();
+            for (Bundle bundle : bundles) {
+                if ("com.vaadin.flow.push".equals(bundle.getSymbolicName())) {
+                    return bundle.getResource("META-INF/resources/" + path);
+                }
+            }
             return null;
         }
 

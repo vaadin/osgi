@@ -102,6 +102,12 @@
             and automatically installed form there. -->
 
         <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.4</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.service.serviceloader</artifactId>
             <version>1.0.0</version>

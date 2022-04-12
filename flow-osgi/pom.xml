@@ -21,7 +21,7 @@
     </licenses>
     
     <properties>
-        <flow.osgi.dependency.versions>[7.0,25)</flow.osgi.dependency.versions>
+        <flow.osgi.dependency.versions>[7.0,24)</flow.osgi.dependency.versions>
         <flow.osgi.manifest.versions>${flow.osgi.dependency.versions}</flow.osgi.manifest.versions>
     </properties>
 

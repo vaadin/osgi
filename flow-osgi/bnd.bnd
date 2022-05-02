@@ -7,5 +7,4 @@ Export-Package: com.vaadin.flow.osgi.support.servlet*
 Import-Package: org.osgi.framework;version='[1.8,2)',\
     org.osgi.service.http.context;version='[1.0,2)',\
     com.vaadin.flow.*;version='${flow.osgi.manifest.versions}',\
-    com.sun.jna;resolution:=optional,\
     *

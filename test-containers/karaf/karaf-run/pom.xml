@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>karaf-test-project-parent</artifactId>
-        <version>8.0-SNAPSHOT</version>
+        <version>8.1-SNAPSHOT</version>
     </parent>
     <artifactId>karaf-test-project-run</artifactId>
 
@@ -41,7 +41,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -69,7 +69,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
         </plugins>
     </build>
 

@@ -12,6 +12,10 @@
     </parent>
     <artifactId>karaf-test-project-run</artifactId>
 
+    <properties>
+        <server.port>8181</server.port>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -132,7 +136,7 @@
                                     <deployProjectArtifact>false</deployProjectArtifact>
                                     <featureRepositories>mvn:com.vaadin/karaf-test-project/${project.version}/xml/features</featureRepositories>
                                     <karafDistribution>mvn:org.apache.karaf/apache-karaf/${karaf.version}/zip</karafDistribution>
-                                    <featuresToInstall>http,war,karaf-test-project</featuresToInstall>
+                                    <featuresToInstall>http,war,http-whiteboard,scr,spifly,karaf-test-project</featuresToInstall>
                                 </configuration>
                             </execution>
                         </executions>

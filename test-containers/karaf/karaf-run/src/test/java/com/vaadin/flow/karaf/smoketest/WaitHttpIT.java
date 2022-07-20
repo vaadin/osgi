@@ -1,14 +1,11 @@
 package com.vaadin.flow.karaf.smoketest;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.junit.Test;
 
-import com.vaadin.flow.testutil.ChromeBrowserTest;
-
-public class WaitHttpIT extends ChromeBrowserTest {
+public class WaitHttpIT extends WaitForUrlTest {
 
     @Override
     public void checkIfServerAvailable() {
@@ -31,23 +28,8 @@ public class WaitHttpIT extends ChromeBrowserTest {
         // As a result IT tests starts immediately and this workaround is used
         // to wait when HTTP server starts to handle HTTP requests.
         // It's executed before any other IT test.
-        waitViewUrl(60);
-    }
-
-    private void waitViewUrl(int count)
-            throws MalformedURLException, InterruptedException {
-        String rootUrl = getRootURL();
-        if (count == 0) {
-            throw new IllegalStateException(
-                    "URL '" + rootUrl + "' is not avialable");
-        }
-        URL url = new URL(rootUrl);
-        try {
-            url.openConnection().connect();
-        } catch (IOException exception) {
-            Thread.sleep(1000);
-            waitViewUrl(count - 1);
-        }
+        URL url = new URL(getRootURL());
+        waitAndGetUrl(url, 60);
     }
 
 }

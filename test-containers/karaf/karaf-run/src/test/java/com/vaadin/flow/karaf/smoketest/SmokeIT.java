@@ -1,7 +1,9 @@
 package com.vaadin.flow.karaf.smoketest;
 
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -29,7 +31,8 @@ public class SmokeIT extends WaitForUrlTest {
             throws MalformedURLException, InterruptedException {
 
         URL url = new URL(getRootURL() + getTestPath());
-        waitAndGetUrl(url, 180);
+        Optional<HttpURLConnection> connection = waitAndGetUrl(url, 180);
+        Assert.assertTrue("URL '" + url.getPath() + "' is not available", connection.isPresent());
 
         super.checkIfServerAvailable();
 

@@ -1,8 +1,11 @@
 package com.vaadin.flow.karaf.smoketest;
 
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Optional;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class WaitHttpIT extends WaitForUrlTest {
@@ -29,7 +32,8 @@ public class WaitHttpIT extends WaitForUrlTest {
         // to wait when HTTP server starts to handle HTTP requests.
         // It's executed before any other IT test.
         URL url = new URL(getRootURL());
-        waitAndGetUrl(url, 60);
+        Optional<HttpURLConnection> connection = waitAndGetUrl(url, 60);
+        Assert.assertTrue("URL '" + url.getPath() + "' is not available", connection.isPresent());
     }
 
 }

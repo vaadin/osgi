@@ -1,20 +1,11 @@
 package com.vaadin.flow.karaf.smoketest;
 
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Optional;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-public class SmokeIT extends WaitForUrlTest {
-
-    @Override
-    public void checkIfServerAvailable() {
-    }
+public class SmokeIT extends BaseKarafTest {
 
     @Override
     protected String getTestPath() {
@@ -27,14 +18,9 @@ public class SmokeIT extends WaitForUrlTest {
     }
 
     @Test
-    public void buttonIsShown_clickIsHandled()
-            throws MalformedURLException, InterruptedException {
+    public void buttonIsShown_clickIsHandled() {
 
-        URL url = new URL(getRootURL() + getTestPath());
-        Optional<HttpURLConnection> connection = waitAndGetUrl(url, 180);
-        Assert.assertTrue("URL '" + url.getPath() + "' is not available", connection.isPresent());
-
-        super.checkIfServerAvailable();
+        waitUntilHttpOk(getRootURL() + getTestPath(), 180);
 
         open();
 

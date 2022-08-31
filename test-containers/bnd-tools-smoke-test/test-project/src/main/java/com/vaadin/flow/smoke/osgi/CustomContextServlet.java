@@ -9,7 +9,7 @@
  */
 package com.vaadin.flow.smoke.osgi;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import com.vaadin.flow.server.VaadinServlet;
 

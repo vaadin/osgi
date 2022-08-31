@@ -9,7 +9,7 @@
  */
 package com.vaadin.flow.smoke.osgi;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 import java.util.Dictionary;
 import java.util.Hashtable;

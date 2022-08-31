@@ -9,8 +9,8 @@
  */
 package com.vaadin.flow.smoke.karaf;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletException;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletAsyncSupported;

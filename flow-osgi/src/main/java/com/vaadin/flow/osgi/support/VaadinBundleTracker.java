@@ -9,7 +9,7 @@
  */
 package com.vaadin.flow.osgi.support;
 
-import javax.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContainerInitializer;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -99,6 +99,9 @@
                         <manifest>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
+                        <manifestEntries>
+                            <CvdlName>vaadin-osgi</CvdlName>
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>

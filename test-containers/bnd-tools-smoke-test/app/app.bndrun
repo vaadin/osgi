@@ -36,5 +36,5 @@
 	bnd.identity;version='${flow.version}';id='com.vaadin.flow.html.components',\
 	bnd.identity;version='${flow.version}';id='com.vaadin.flow.push',\
 	bnd.identity;version='${flow.version}';id='com.vaadin.flow.osgi',\
-	bnd.identity;version='1.7.0';id='com.vaadin.license-checker'
+	bnd.identity;version='1.8.0';id='com.vaadin.license-checker'
 

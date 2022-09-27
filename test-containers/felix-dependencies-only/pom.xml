@@ -176,13 +176,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- explicitly defined for TeamCity -->
-        <dependency>
-            <groupId>net.java.dev.jna</groupId>
-            <artifactId>jna</artifactId>
-            <version>5.11.0</version>
-        </dependency>
-
     </dependencies>
     <build>
         <plugins>

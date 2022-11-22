@@ -3,3 +3,7 @@
 **/.classpath
 /driver_zips/
 /driver/
+.idea
+*.iml
+**/frontend/generated
+**/node_modules

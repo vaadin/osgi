@@ -31,6 +31,12 @@
            <version>${flow.version}</version>
            <type>jar</type>
            <classifier>ui</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>vaadin-dev-server</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         
         <!--  its views dependencies -->
@@ -40,6 +46,12 @@
             <version>${flow.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>vaadin-dev-server</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         
 

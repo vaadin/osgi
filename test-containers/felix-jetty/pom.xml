@@ -167,6 +167,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- oshi-core dependency that doesn't get added for some reason -->
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.11.0</version>
+        </dependency>
+
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components-testbench</artifactId>
@@ -283,6 +290,7 @@
                             <workingDirectory>${project.build.directory}/${felix.home}</workingDirectory>
                             <commandlineArgs>-Dgosh.args="--nointeractive
                                 -s"
+                                -Dvaadin.devmode.liveReload.enabled=false
                                 -jar
                                 bin/felix.jar</commandlineArgs>
                         </configuration>

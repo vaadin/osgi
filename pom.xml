@@ -97,7 +97,7 @@
     </properties>
 
     <repositories>
-        <!-- The order of definitions matters. Explicitly defining central 
+        <!-- The order of definitions matters. Explicitly defining central
             here to make sure it has the highest priority. -->
         <repository>
             <id>central</id>
@@ -123,7 +123,7 @@
     </repositories>
 
     <pluginRepositories>
-        <!-- The order of definitions matters. Explicitly defining central 
+        <!-- The order of definitions matters. Explicitly defining central
             here to make sure it has the highest priority. -->
         <pluginRepository>
             <id>central</id>

@@ -12,7 +12,7 @@
     </parent>
     <artifactId>karaf-test-project-parent</artifactId>
     <properties>
-        <karaf.version>4.3.7</karaf.version>
+        <karaf.version>4.4.0</karaf.version>
     </properties>
 
     <build>

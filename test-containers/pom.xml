@@ -280,6 +280,7 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
+                <module>felix-dependencies-only</module>
                 <module>felix-jetty</module>
                 <module>karaf</module>
             </modules>

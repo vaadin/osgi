@@ -26,9 +26,8 @@
     <url>https://vaadin.com</url>
     <licenses>
         <license>
-            <name>Commercial Vaadin Developer License version 4.0</name>
-            <url>https://vaadin.com/license/cvdl-4.0</url>
-            <distribution>manual</distribution>
+            <name>Vaadin Commercial License and Service Terms</name>
+            <url>https://vaadin.com/commercial-license-and-service-terms</url>
         </license>
     </licenses>
     <inceptionYear>2020</inceptionYear>
@@ -394,7 +393,7 @@
                     <artifactId>license-maven-plugin</artifactId>
                     <version>2.6</version>
                     <configuration>
-                        <header>src/license/cvdl4/header.txt</header>
+                        <header>src/license/vclst/header.txt</header>
                         <quiet>false</quiet>
                         <failIfMissing>true</failIfMissing>
                         <aggregate>false</aggregate>

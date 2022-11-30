@@ -7,7 +7,7 @@
     <artifactId>flow-osgi-project</artifactId>
     <name>Flow OSGi</name>
     <packaging>pom</packaging>
-    <version>8.0-SNAPSHOT</version>
+    <version>8.1-SNAPSHOT</version>
 
     <parent>
         <groupId>com.vaadin</groupId>
@@ -87,7 +87,7 @@
         <bnd.version>6.1.0</bnd.version>
         <osgi.core.version>7.0.0</osgi.core.version>
         <osgi.compendium.version>7.0.0</osgi.compendium.version>
-        <flow.version>${project.version}</flow.version>
+        <flow.version>23.3-SNAPSHOT</flow.version>
 
         <maven.test.skip>false</maven.test.skip>
 

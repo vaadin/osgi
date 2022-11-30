@@ -19,7 +19,7 @@
             <distribution>manual</distribution>
         </license>
     </licenses>
-    
+
     <properties>
         <flow.osgi.dependency.versions>[7.0,24)</flow.osgi.dependency.versions>
         <flow.osgi.manifest.versions>${flow.osgi.dependency.versions}</flow.osgi.manifest.versions>
@@ -60,7 +60,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>license-checker</artifactId>
-            <version>1.1.1</version>
+            <version>1.11.2</version>
         </dependency>
 
         <dependency>
@@ -99,6 +99,9 @@
                         <manifest>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
+                        <manifestEntries>
+                            <CvdlName>vaadin-osgi</CvdlName>
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>

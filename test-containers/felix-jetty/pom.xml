@@ -31,6 +31,12 @@
            <version>${flow.version}</version>
            <type>jar</type>
            <classifier>ui</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>vaadin-dev-server</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         
         <!--  its views dependencies -->
@@ -40,6 +46,12 @@
             <version>${flow.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>vaadin-dev-server</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         
 
@@ -153,6 +165,13 @@
             <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
             <version>1.3.4</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- oshi-core dependency that doesn't get added for some reason -->
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.11.0</version>
         </dependency>
 
         <dependency>
@@ -271,6 +290,7 @@
                             <workingDirectory>${project.build.directory}/${felix.home}</workingDirectory>
                             <commandlineArgs>-Dgosh.args="--nointeractive
                                 -s"
+                                -Dvaadin.devmode.liveReload.enabled=false
                                 -jar
                                 bin/felix.jar</commandlineArgs>
                         </configuration>

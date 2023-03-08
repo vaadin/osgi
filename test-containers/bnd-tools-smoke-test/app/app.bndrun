@@ -15,13 +15,13 @@
         bnd.identity;id='org.apache.tomcat-embed-core'
 
 -runsystempackages: \
-        org.slf4j;version=1.7.36,\
-        org.slf4j.helpers;version=1.7.36,\
-        org.slf4j.spi;version=1.7.36
+        org.slf4j;version=2.0.6,\
+        org.slf4j.helpers;version=2.0.6,\
+        org.slf4j.spi;version=2.0.6
 
 -runpath: \
         slf4j.api,\
-        slf4j.simple;version=1.7.36
+        slf4j.simple;version=2.0.6
 
 
 -runee: JavaSE-11
@@ -36,5 +36,5 @@
 	bnd.identity;version='${flow.version}';id='com.vaadin.flow.html.components',\
 	bnd.identity;version='${flow.version}';id='com.vaadin.flow.push',\
 	bnd.identity;version='${flow.version}';id='com.vaadin.flow.osgi',\
-	bnd.identity;version='1.11.2';id='com.vaadin.license-checker'
+	bnd.identity;version='1.12.0';id='com.vaadin.license-checker'
 

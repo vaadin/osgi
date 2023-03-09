@@ -63,7 +63,7 @@
         <failOnMissingWebXml>false</failOnMissingWebXml>
 
         <!-- Dependencies -->
-        <slf4j.version>2.0.1</slf4j.version>
+        <slf4j.version>1.7.36</slf4j.version>
 
         <!-- Plugins -->
         <driver.binary.downloader.maven.plugin.version>1.0.17

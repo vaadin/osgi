@@ -24,9 +24,18 @@
         <flow.osgi.manifest.versions>${flow.osgi.dependency.versions}</flow.osgi.manifest.versions>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
 
     <dependencies>
-
         <!-- Project dependencies -->
 
         <!-- API DEPENDENCIES -->

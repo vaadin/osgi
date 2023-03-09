@@ -22,8 +22,18 @@
         <path.to.java></path.to.java>
     </properties>
 
-    <dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
+
+    <dependencies>
         <!--  test views dependencies -->
         <dependency>
            <groupId>com.vaadin</groupId>
@@ -172,6 +182,12 @@
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>
             <version>5.12.1</version>
+        </dependency>
+        <!-- oshi-core dependency that doesn't get added for some reason -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
 
         <dependency>

@@ -203,7 +203,7 @@
                             <overWriteIfNewer>true</overWriteIfNewer>
                             <excludeGroupIds>
                                 org.seleniumhq.selenium, javax.servlet, com.github.jknack, com.github.fge, com.github.java-json-tools, io.swagger</excludeGroupIds>
-                            <excludeArtifactIds>osgi.core, slf4j-ext</excludeArtifactIds>
+                            <excludeArtifactIds>osgi.core, slf4j-ext, slf4j</excludeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>

@@ -30,14 +30,14 @@
             <artifactId>license-checker</artifactId>
             <version>1.12.0</version>
             <exclusions>
-<!--                <exclusion>-->
-<!--                    <groupId>org.slf4j</groupId>-->
-<!--                    <artifactId>slf4j</artifactId>-->
-<!--                </exclusion>-->
                 <exclusion>
-                    <groupId>com.github.oshi</groupId>
-                    <artifactId>oshi-core</artifactId>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j</artifactId>
                 </exclusion>
+<!--                <exclusion>-->
+<!--                    <groupId>com.github.oshi</groupId>-->
+<!--                    <artifactId>oshi-core</artifactId>-->
+<!--                </exclusion>-->
             </exclusions>
         </dependency>
 
@@ -47,16 +47,16 @@
             <version>${slf4j.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.github.oshi</groupId>
-            <artifactId>oshi-core</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.github.oshi</groupId>-->
+<!--            <artifactId>oshi-core</artifactId>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.slf4j</groupId>-->
+<!--                    <artifactId>slf4j</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>com.google.code.findbugs</groupId>

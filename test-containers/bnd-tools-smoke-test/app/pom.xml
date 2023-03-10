@@ -4,7 +4,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>bnd-smoke-app</artifactId>
-    <name>The Aplication that runs smoke test using bnd tools</name>
+    <name>The Application that runs smoke test using bnd tools</name>
 
     <packaging>jar</packaging>
     <parent>
@@ -30,10 +30,10 @@
             <artifactId>license-checker</artifactId>
             <version>1.12.0</version>
             <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j</artifactId>
-                </exclusion>
+<!--                <exclusion>-->
+<!--                    <groupId>org.slf4j</groupId>-->
+<!--                    <artifactId>slf4j</artifactId>-->
+<!--                </exclusion>-->
                 <exclusion>
                     <groupId>com.github.oshi</groupId>
                     <artifactId>oshi-core</artifactId>

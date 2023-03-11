@@ -73,7 +73,7 @@
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
         <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
         <maven.exec.plugin.version>1.6.0</maven.exec.plugin.version>
-        <testbench.version>6.3.0</testbench.version>
+        <testbench.version>8.2.0</testbench.version>
         <properties-maven-plugin.version>1.0.0</properties-maven-plugin.version>
         <karaf-maven-plugin.version>4.4.0</karaf-maven-plugin.version>
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
@@ -86,7 +86,7 @@
         <bnd.version>6.1.0</bnd.version>
         <osgi.core.version>7.0.0</osgi.core.version>
         <osgi.compendium.version>7.0.0</osgi.compendium.version>
-        <flow.version>23.3-SNAPSHOT</flow.version>
+        <flow.version>${project.version}</flow.version>
 
         <maven.test.skip>false</maven.test.skip>
 

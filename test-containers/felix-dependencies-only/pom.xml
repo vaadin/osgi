@@ -202,7 +202,7 @@
                             <outputDirectory>${project.build.directory}/bundle</outputDirectory>
                             <overWriteIfNewer>true</overWriteIfNewer>
                             <excludeGroupIds>
-                                org.seleniumhq.selenium, javax.servlet, com.github.jknack, com.github.fge, com.github.java-json-tools, io.swagger, com.github.oshi</excludeGroupIds>
+                                org.seleniumhq.selenium, javax.servlet, com.github.jknack, com.github.fge, com.github.java-json-tools, io.swagger, org.slf4j</excludeGroupIds>
                             <excludeArtifactIds>osgi.core, slf4j-ext</excludeArtifactIds>
                         </configuration>
                     </execution>

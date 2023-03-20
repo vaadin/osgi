@@ -19,7 +19,7 @@
             <distribution>manual</distribution>
         </license>
     </licenses>
-    
+
     <properties>
         <flow.osgi.dependency.versions>[7.0,11)</flow.osgi.dependency.versions>
         <flow.osgi.manifest.versions>${flow.osgi.dependency.versions}</flow.osgi.manifest.versions>
@@ -60,7 +60,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>license-checker</artifactId>
-            <version>1.1.1</version>
+            <version>1.12.2</version>
         </dependency>
 
         <dependency>

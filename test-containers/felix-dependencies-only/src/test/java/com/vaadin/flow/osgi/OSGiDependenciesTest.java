@@ -37,7 +37,7 @@ public class OSGiDependenciesTest {
 
     private static class TestBundleLogger extends Logger {
 
-        private List<String> errors = new ArrayList<>();
+        private final List<String> errors = new ArrayList<>();
 
         @Override
         protected void doLog(Bundle bundle, ServiceReference sr, int level,
@@ -68,7 +68,7 @@ public class OSGiDependenciesTest {
         configProps.put(FelixConstants.LOG_LOGGER_PROP, logger);
 
         try {
-            FrameworkFactory factory = getFrameworkFactory();
+            FrameworkFactory factory = new FrameworkFactory();
             Framework m_fwk = factory.newFramework(configProps);
             m_fwk.init();
             AutoProcessor.process(configProps, m_fwk.getBundleContext());
@@ -77,8 +77,7 @@ public class OSGiDependenciesTest {
 
             if (!logger.errors.isEmpty()) {
                 LOGGER.error("Unresolved OSGi dependencies:");
-                LOGGER.error(logger.errors.stream().collect(
-                        Collectors.joining("\n")));
+                LOGGER.error(String.join("\n", logger.errors));
                 Assert.fail("There are unresolved OSGi dependencies. " +
                         "Please check log for details.");
             }
@@ -87,27 +86,4 @@ public class OSGiDependenciesTest {
             Assert.fail("Could not create framework: " + ex);
         }
     }
-
-    private static FrameworkFactory getFrameworkFactory() throws Exception {
-        URL url = OSGiDependenciesTest.class.getClassLoader().getResource(
-                "META-INF/services/org.osgi.framework.launch.FrameworkFactory");
-        if (url != null) {
-            BufferedReader br = new BufferedReader(
-                    new InputStreamReader(url.openStream()));
-            try {
-                for (String s = br.readLine(); s != null; s = br.readLine()) {
-                    s = s.trim();
-                    if ((s.length() > 0) && (s.charAt(0) != '#')) {
-                        return (FrameworkFactory) Class.forName(s)
-                                .getDeclaredConstructor().newInstance();
-                    }
-                }
-            } finally {
-                if (br != null) br.close();
-            }
-        }
-
-        throw new Exception("Could not find framework factory.");
-    }
-
 }

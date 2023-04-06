@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-osgi-project</artifactId>
-        <version>7.0-SNAPSHOT</version>
+        <version>7.1-SNAPSHOT</version>
     </parent>
     <artifactId>flow-osgi-test-containers</artifactId>
     <name>Flow tests</name>
@@ -268,12 +268,12 @@
             </properties>
         </profile>
         <profile>
-            <!-- This profile and the next one "bnd-tools" should be mutually 
+            <!-- This profile and the next one "bnd-tools" should be mutually
             exclusive and should NOT be executed in the same maven run!
             The problem is: they both use execution maven plugin to start the OSGi container
             which doesn't stop when ITs are finished. It stops only when (maven) JVM exits.
-            As a result one container will still be active when ITs from another 
-            module starts. That will not allow another OSGi container starts. 
+            As a result one container will still be active when ITs from another
+            module starts. That will not allow another OSGi container starts.
             -->
             <id>non-bnd-tools</id>
             <activation>
@@ -285,12 +285,12 @@
             </modules>
         </profile>
         <profile>
-            <!-- This profile and the above one "felix-jetty" should be mutually 
+            <!-- This profile and the above one "felix-jetty" should be mutually
             exclusive and should NOT be executed in the same maven run!
             The problem is: they both use execution maven plugin to start the OSGi container
             which doesn't stop when ITs are finished. It stops only when (maven) JVM exits.
-            As a result one container will still be active when ITs from another 
-            module starts. That will not allow another OSGi container starts. 
+            As a result one container will still be active when ITs from another
+            module starts. That will not allow another OSGi container starts.
             -->
             <id>bnd-tools</id>
             <modules>
@@ -298,7 +298,7 @@
             </modules>
         </profile>
     </profiles>
-    
+
 
 </project>
 

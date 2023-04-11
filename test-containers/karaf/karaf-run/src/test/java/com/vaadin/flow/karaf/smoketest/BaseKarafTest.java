@@ -32,6 +32,11 @@ public abstract class BaseKarafTest extends ChromeBrowserTest {
     public void checkIfServerAvailable() {
     }
 
+    @Override
+    protected int getDeploymentPort() {
+        return Integer.getInteger("serverPort");
+    }
+
     protected HttpURLConnection waitUntilHttpOk(String path, int timeoutInSeconds) {
         return waitUntil(input -> {
             try {

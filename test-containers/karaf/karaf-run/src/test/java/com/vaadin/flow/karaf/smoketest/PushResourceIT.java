@@ -24,6 +24,11 @@ import com.vaadin.flow.testutil.ChromeBrowserTest;
 
 public class PushResourceIT extends ChromeBrowserTest {
 
+    @Override
+    protected int getDeploymentPort() {
+        return 8181;
+    }
+
     @Test
     public void pushResourceIsRegistered() throws IOException {
         String rootUrl = getRootURL();

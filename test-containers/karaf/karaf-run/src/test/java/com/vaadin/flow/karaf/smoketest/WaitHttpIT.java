@@ -26,6 +26,12 @@ public class WaitHttpIT extends ChromeBrowserTest {
     public void setup() {
     }
 
+    @Override
+    protected int getDeploymentPort() {
+        return 8181;
+    }
+
+
     @Test
     public void waitForHttp()
             throws MalformedURLException, InterruptedException {

@@ -32,6 +32,7 @@
                             <arguments>
                                 <argument>package</argument>
                                 <argument>-Prun-karaf</argument>
+                                <argument>-Dflow.version=${flow.version}</argument>
                             </arguments>
                         </configuration>
                     </execution>

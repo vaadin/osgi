@@ -20,11 +20,6 @@ public class SmokeIT extends BaseKarafTest {
         return "/smoke-view";
     }
 
-    @Override
-    protected int getDeploymentPort() {
-        return 8181;
-    }
-
     @Test
     public void buttonIsShown_clickIsHandled() {
 

@@ -28,7 +28,6 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>license-checker</artifactId>
-            <version>1.12.2</version>
         </dependency>
 
         <dependency>

@@ -84,7 +84,7 @@
         <bnd.version>6.1.0</bnd.version>
         <osgi.core.version>7.0.0</osgi.core.version>
         <osgi.compendium.version>7.0.0</osgi.compendium.version>
-        <flow.version>23.5-SNAPSHOT</flow.version>
+        <flow.version>23.6-SNAPSHOT</flow.version>
 
         <maven.test.skip>false</maven.test.skip>
 

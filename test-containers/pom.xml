@@ -34,6 +34,12 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components</artifactId>
             <version>${flow.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-io</groupId>
+                    <artifactId>commons-io</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
